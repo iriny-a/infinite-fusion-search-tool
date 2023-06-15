@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 
 import FusionTableRow from "./FusionTableRow";
 
-import { FusionArtURL, FusionFilters, PokeAPIRes, PokemonDataEntry, POKE_NAME_TO_ID, parsePokeAPI } from "../../data/data";
-import rawFusionWorker from "./fetchFusion";
+import { FusionArtURL, FusionFilters, PokemonDataEntry, POKE_NAME_TO_ID } from "../../data/data";
 
 import "./FusionTable.css";
 
@@ -58,21 +57,7 @@ const FusionTableHandler: React.FC<FusionTableHandlerProps> = (props) => {
         setAllLoaded(false);
       }
 
-      if (!currentMonData) {
-        (async () => {
-          const pokeAPIRes = await fetch(`https://pokeapi.co/api/v2/pokemon/${currentMon}`);
-          const pokeAPIJson = await pokeAPIRes.json();
-          const currentMonParsed = parsePokeAPI(pokeAPIJson);
-          setCurrentMonData(currentMonParsed);
-        })();
-      } else {
-        (async () => {
-          const inputMon = Array.from(POKE_NAME_TO_ID.keys())[fusionData.length];
-          const newFusions = await getFusionData(currentMonData as PokemonDataEntry, inputMon);
-          setFusionData([...fusionData, newFusions]);
-        })();
-      }
-      return;
+      // Needs to be completely rewritten for the new data schematic
     }
 
     filterFusions();
@@ -111,7 +96,10 @@ const getArtURL = async (headId: string, bodyId: string): Promise<FusionArtURL> 
     
 }
 
-const getFusionData = async (baseMonData: PokemonDataEntry, inputMon: string): Promise<PokemonDataEntry[]> => {
+const getFusionData = async (baseMonData: PokemonDataEntry, inputMon: string): /* Promise<PokemonDataEntry[]> */ Promise<void> => {
+  // This needs to be completely rewritten for the new local data cache.
+
+  /*
   // First, fetch and parse data for the input mon
   const pokeAPIRes = await fetch(`https://pokeapi.co/api/v2/pokemon/${inputMon}`);
   const pokeAPIJson = await pokeAPIRes.json();
@@ -125,9 +113,6 @@ const getFusionData = async (baseMonData: PokemonDataEntry, inputMon: string): P
   const pokeAPIEvoChainRes = await fetch(evoChainURL);
   const pokeAPIEvoChainJson = await pokeAPIEvoChainRes.json();
   let evoChain = pokeAPIEvoChainJson.chain;
-  while (true) {
-    evoChain.evolves_to.forEach(evo => )
-  }
 
   // Perform fusion in both directions
   // mostly placeholder for now, to ensure functionality
@@ -149,6 +134,7 @@ const getFusionData = async (baseMonData: PokemonDataEntry, inputMon: string): P
   }
 
   return [baseInputFusion, inputBaseFusion];
+  */
 }
 
 const filterFusions = (filters?: FusionFilters): PokemonDataEntry[] => {

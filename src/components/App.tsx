@@ -4,7 +4,7 @@ import FusionInput from './form/FusionForm';
 import FusionTable from './table/FusionTable';
 
 import './App.css';
-import { FusionFilters } from '../data/data';
+import { FusionFilters, PokemonDataEntry, getAllPokemonData, getFullyEvolvedNames } from '../data/data';
 
 
 const App: React.FC = () => {
@@ -14,10 +14,23 @@ const App: React.FC = () => {
     typeOverride: new Map<string, boolean>(),
     fullyEvolvedOnly: false,
   });
+  const [ pokeData, setPokeData ] = useState<Map<string, PokemonDataEntry> | null>(null);
+  const [ fullyEvolvedList, setFullyEvolvedList ] = useState<Set<string> | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      setPokeData(await getAllPokemonData());
+      setFullyEvolvedList(await getFullyEvolvedNames());
+    })();
+  }, []);
 
   useEffect(() => {
     console.log("the new pokemon is " + currentMon);
   }, [currentMon]);
+
+  if (pokeData === null || fullyEvolvedList === null) {
+    return <>Loading...</>;
+  }
 
   return (
     <>

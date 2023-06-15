@@ -1,3 +1,68 @@
+export interface PokemonStats {
+  attack: number;
+  defense: number;
+  speed: number;
+  "special-attack": number;
+  "special-defense": number;
+  hp: number;
+}
+
+export interface PokemonTypes {
+  firstType: string;
+  secondType: string | null;
+}
+
+export interface PokemonAbilities {
+  firstAbility: string;
+  secondAbility: string | null;
+  hiddenAbility: string | null;
+}
+
+export interface FusionArtURL {
+  url: string;
+  isCustom: boolean;
+}
+
+export interface PokemonDataEntry {
+  name: string;
+  id: string;
+  stats: PokemonStats;
+  types: PokemonTypes;
+  abilities: PokemonAbilities;
+  artUrl?: FusionArtURL;
+  fullyEvolved?: boolean;
+}
+
+export interface PokeAPIRes {
+  species: {
+    name: string;
+  };
+  stats: Array<{
+    base_stat: number;
+    stat: {
+      name: "attack" | "defense" | "speed" | "special-attack" | "special-defense" | "hp";
+    }
+  }>;
+  types: Array<{
+    type: {
+      name: string;
+    };
+  }>;
+  abilities: Array<{
+    ability: {
+      name: string;
+    };
+    is_hidden: boolean;
+    slot: number;
+  }>;
+}
+
+export interface FusionFilters {
+  customArtOnly: boolean;
+  typeOverride: Map<string, boolean>;
+  fullyEvolvedOnly: boolean;
+}
+
 // Mapping is needed since PIF ids are different from national dex numbers.
 export const POKE_NAME_TO_ID = new Map<string, string>([
   ["bulbasaur", "1"],
@@ -422,232 +487,6 @@ export const POKE_NAME_TO_ID = new Map<string, string>([
   ["stunfisk", "420"],
 ]);
 
-// PokeAPI's support for getting this specific information is extremely clunky,
-// requiring several different API calls and a recursion to actually grab.
-// We'll just load it here in memory instead, to save everyone's time.
-export const FULLY_EVOLVED_NAMES = new Set<string>([
-  'venusaur',
-  'charizard',
-  'blastoise',
-  'butterfree',
-  'beedrill',
-  'pidgeot',
-  'raticate',
-  'fearow',
-  'arbok',
-  'raichu',
-  'sandslash',
-  'nidoqueen',
-  'nidoking',
-  'clefable',
-  'ninetales',
-  'wigglytuff',
-  'crobat',
-  'vileplume',
-  'bellossom',
-  'parasect',
-  'venomoth',
-  'dugtrio',
-  'persian',
-  'golduck',
-  'primeape',
-  'arcanine',
-  'poliwrath',
-  'politoed',
-  'alakazam',
-  'machamp',
-  'victreebel',
-  'tentacruel',
-  'golem',
-  'rapidash',
-  'slowbro',
-  'slowking',
-  'magnezone',
-  'farfetchd',
-  'dodrio',
-  'dewgong',
-  'muk',
-  'cloyster',
-  'gengar',
-  'steelix',
-  'hypno',
-  'kingler',
-  'electrode',
-  'exeggutor',
-  'marowak',
-  'hitmonlee',
-  'hitmonchan',
-  'hitmontop',
-  'lickilicky',
-  'weezing',
-  'rhyperior',
-  'blissey',
-  'tangrowth',
-  'kangaskhan',
-  'kingdra',
-  'seaking',
-  'starmie',
-  'mr-mime',
-  'scizor',
-  'jynx',
-  'electivire',
-  'magmortar',
-  'pinsir',
-  'tauros',
-  'gyarados',
-  'lapras',
-  'ditto',
-  'vaporeon',
-  'jolteon',
-  'flareon',
-  'espeon',
-  'umbreon',
-  'leafeon',
-  'glaceon',
-  'sylveon',
-  'porygon-z',
-  'omastar',
-  'kabutops',
-  'aerodactyl',
-  'snorlax',
-  'articuno',
-  'zapdos',
-  'moltres',
-  'dragonite',
-  'mewtwo',
-  'mew',
-  'meganium',
-  'typhlosion',
-  'feraligatr',
-  'furret',
-  'noctowl',
-  'ledian',
-  'ariados',
-  'lanturn',
-  'togekiss',
-  'xatu',
-  'ampharos',
-  'azumarill',
-  'sudowoodo',
-  'jumpluff',
-  'ambipom',
-  'sunflora',
-  'yanmega',
-  'quagsire',
-  'honchkrow',
-  'mismagius',
-  'unown',
-  'wobbuffet',
-  'girafarig',
-  'forretress',
-  'dunsparce',
-  'gliscor',
-  'granbull',
-  'qwilfish',
-  'shuckle',
-  'heracross',
-  'weavile',
-  'ursaring',
-  'magcargo',
-  'mamoswine',
-  'corsola',
-  'octillery',
-  'delibird',
-  'mantine',
-  'skarmory',
-  'houndoom',
-  'donphan',
-  'stantler',
-  'smeargle',
-  'miltank',
-  'raikou',
-  'entei',
-  'suicune',
-  'tyranitar',
-  'lugia',
-  'ho-oh',
-  'celebi',
-  'sceptile',
-  'blaziken',
-  'swampert',
-  'gardevoir',
-  'gallade',
-  'ninjask',
-  'shedinja',
-  'kecleon',
-  'metagross',
-  'bibarel',
-  'spiritomb',
-  'lucario',
-  'garchomp',
-  'mawile',
-  'cradily',
-  'armaldo',
-  'rampardos',
-  'bastiodon',
-  'slaking',
-  'absol',
-  'dusknoir',
-  'wailord',
-  'arceus',
-  'torterra',
-  'infernape',
-  'empoleon',
-  'probopass',
-  'aegislash-shield',
-  'bisharp',
-  'luxray',
-  'aggron',
-  'flygon',
-  'milotic',
-  'salamence',
-  'klinklang',
-  'zoroark',
-  'kyogre',
-  'groudon',
-  'rayquaza',
-  'dialga',
-  'palkia',
-  'giratina-altered',
-  'regigigas',
-  'darkrai',
-  'genesect',
-  'reshiram',
-  'zekrom',
-  'kyurem',
-  'roserade',
-  'drifblim',
-  'lopunny',
-  'breloom',
-  'banette',
-  'rotom',
-  'reuniclus',
-  'whimsicott',
-  'krookodile',
-  'cofagrigus',
-  'galvantula',
-  'ferrothorn',
-  'chandelure',
-  'haxorus',
-  'golurk',
-  'pyukumuku',
-  'klefki',
-  'talonflame',
-  'mimikyu-disguised',
-  'volcarona',
-  'hydreigon',
-  'latias',
-  'latios',
-  'deoxys-normal',
-  'jirachi',
-  'stunfisk',
-]);
-
-// Originally this data was fetched (from PokeAPI) and parsed per request;
-// this is not performant for either us or PokeAPI, so we'll load it into memory
-// as well.
-export const POKEMON_DATA = [];
-
 export const TYPE_NAMES = [
   "normal",
   "fire",
@@ -669,69 +508,24 @@ export const TYPE_NAMES = [
   "fairy",
 ]
 
-export interface PokemonStats {
-  attack: number;
-  defense: number;
-  speed: number;
-  "special-attack": number;
-  "special-defense": number;
-  hp: number;
+// PokeAPI's support for getting this specific information is extremely clunky,
+// requiring several different API calls and a recursion to actually grab.
+// It's much more performant to cache and front-load the work.
+export const getFullyEvolvedNames = async (): Promise<Set<string>> => {
+  const dataFetch = await fetch("./finalEvos.json");
+  const fullyEvolvedNames = new Set<string>(await dataFetch.json());
+  return fullyEvolvedNames;
 }
 
-export interface PokemonTypes {
-  firstType: string;
-  secondType: string | null;
-}
+export const getAllPokemonData = async (): Promise<Map<string, PokemonDataEntry>> => {
+  const dataFetch = await fetch("./pokeData.json");
+  const dataUnparsed = await dataFetch.json();
 
-export interface PokemonAbilities {
-  firstAbility: string;
-  secondAbility: string | null;
-  hiddenAbility: string | null;
-}
-
-export interface FusionArtURL {
-  url: string;
-  isCustom: boolean;
-}
-
-export interface PokemonDataEntry {
-  name: string;
-  id: string;
-  stats: PokemonStats;
-  types: PokemonTypes;
-  abilities: PokemonAbilities;
-  artUrl?: FusionArtURL;
-  fullyEvolved?: boolean;
-}
-
-export interface PokeAPIRes {
-  species: {
-    name: string;
-  };
-  stats: Array<{
-    base_stat: number;
-    stat: {
-      name: "attack" | "defense" | "speed" | "special-attack" | "special-defense" | "hp";
-    }
-  }>;
-  types: Array<{
-    type: {
-      name: string;
-    };
-  }>;
-  abilities: Array<{
-    ability: {
-      name: string;
-    };
-    is_hidden: boolean;
-    slot: number;
-  }>;
-}
-
-export interface FusionFilters {
-  customArtOnly: boolean;
-  typeOverride: Map<string, boolean>;
-  fullyEvolvedOnly: boolean;
+  const pokeDataMap = new Map<string, PokemonDataEntry>();
+  dataUnparsed.forEach((dt: [string, PokeAPIRes]) => {
+    pokeDataMap.set(dt[0], parsePokeAPI(dt[1]));
+  })
+  return pokeDataMap;
 }
 
 // Some PIF mons are slightly different from the most recent Game Freak versions
