@@ -1,5 +1,7 @@
-// Mapping is needed since PIF ids are different from national dex numbers.
-export const POKE_NAME_TO_ID = new Map<string, string>([
+const { writeFile } = require("fs");
+const { join } = require("path");
+
+const nameToId = new Map([
   ["bulbasaur", "1"],
   ["ivysaur", "2"],
   ["venusaur", "3"],
@@ -422,385 +424,155 @@ export const POKE_NAME_TO_ID = new Map<string, string>([
   ["stunfisk", "420"],
 ]);
 
-// PokeAPI's support for getting this specific information is extremely clunky,
-// requiring several different API calls and a recursion to actually grab.
-// We'll just load it here in memory instead, to save everyone's time.
-export const FULLY_EVOLVED_NAMES = new Set<string>([
-  'venusaur',
-  'charizard',
-  'blastoise',
-  'butterfree',
-  'beedrill',
-  'pidgeot',
-  'raticate',
-  'fearow',
-  'arbok',
-  'raichu',
-  'sandslash',
-  'nidoqueen',
-  'nidoking',
-  'clefable',
-  'ninetales',
-  'wigglytuff',
-  'crobat',
-  'vileplume',
-  'bellossom',
-  'parasect',
-  'venomoth',
-  'dugtrio',
-  'persian',
-  'golduck',
-  'primeape',
-  'arcanine',
-  'poliwrath',
-  'politoed',
-  'alakazam',
-  'machamp',
-  'victreebel',
-  'tentacruel',
-  'golem',
-  'rapidash',
-  'slowbro',
-  'slowking',
-  'magnezone',
-  'farfetchd',
-  'dodrio',
-  'dewgong',
-  'muk',
-  'cloyster',
-  'gengar',
-  'steelix',
-  'hypno',
-  'kingler',
-  'electrode',
-  'exeggutor',
-  'marowak',
-  'hitmonlee',
-  'hitmonchan',
-  'hitmontop',
-  'lickilicky',
-  'weezing',
-  'rhyperior',
-  'blissey',
-  'tangrowth',
-  'kangaskhan',
-  'kingdra',
-  'seaking',
-  'starmie',
-  'mr-mime',
-  'scizor',
-  'jynx',
-  'electivire',
-  'magmortar',
-  'pinsir',
-  'tauros',
-  'gyarados',
-  'lapras',
-  'ditto',
-  'vaporeon',
-  'jolteon',
-  'flareon',
-  'espeon',
-  'umbreon',
-  'leafeon',
-  'glaceon',
-  'sylveon',
-  'porygon-z',
-  'omastar',
-  'kabutops',
-  'aerodactyl',
-  'snorlax',
-  'articuno',
-  'zapdos',
-  'moltres',
-  'dragonite',
-  'mewtwo',
-  'mew',
-  'meganium',
-  'typhlosion',
-  'feraligatr',
-  'furret',
-  'noctowl',
-  'ledian',
-  'ariados',
-  'lanturn',
-  'togekiss',
-  'xatu',
-  'ampharos',
-  'azumarill',
-  'sudowoodo',
-  'jumpluff',
-  'ambipom',
-  'sunflora',
-  'yanmega',
-  'quagsire',
-  'honchkrow',
-  'mismagius',
-  'unown',
-  'wobbuffet',
-  'girafarig',
-  'forretress',
-  'dunsparce',
-  'gliscor',
-  'granbull',
-  'qwilfish',
-  'shuckle',
-  'heracross',
-  'weavile',
-  'ursaring',
-  'magcargo',
-  'mamoswine',
-  'corsola',
-  'octillery',
-  'delibird',
-  'mantine',
-  'skarmory',
-  'houndoom',
-  'donphan',
-  'stantler',
-  'smeargle',
-  'miltank',
-  'raikou',
-  'entei',
-  'suicune',
-  'tyranitar',
-  'lugia',
-  'ho-oh',
-  'celebi',
-  'sceptile',
-  'blaziken',
-  'swampert',
-  'gardevoir',
-  'gallade',
-  'ninjask',
-  'shedinja',
-  'kecleon',
-  'metagross',
-  'bibarel',
-  'spiritomb',
-  'lucario',
-  'garchomp',
-  'mawile',
-  'cradily',
-  'armaldo',
-  'rampardos',
-  'bastiodon',
-  'slaking',
-  'absol',
-  'dusknoir',
-  'wailord',
-  'arceus',
-  'torterra',
-  'infernape',
-  'empoleon',
-  'probopass',
-  'aegislash-shield',
-  'bisharp',
-  'luxray',
-  'aggron',
-  'flygon',
-  'milotic',
-  'salamence',
-  'klinklang',
-  'zoroark',
-  'kyogre',
-  'groudon',
-  'rayquaza',
-  'dialga',
-  'palkia',
-  'giratina-altered',
-  'regigigas',
-  'darkrai',
-  'genesect',
-  'reshiram',
-  'zekrom',
-  'kyurem',
-  'roserade',
-  'drifblim',
-  'lopunny',
-  'breloom',
-  'banette',
-  'rotom',
-  'reuniclus',
-  'whimsicott',
-  'krookodile',
-  'cofagrigus',
-  'galvantula',
-  'ferrothorn',
-  'chandelure',
-  'haxorus',
-  'golurk',
-  'pyukumuku',
-  'klefki',
-  'talonflame',
-  'mimikyu-disguised',
-  'volcarona',
-  'hydreigon',
-  'latias',
-  'latios',
-  'deoxys-normal',
-  'jirachi',
-  'stunfisk',
+// PokeAPI's evolution API uses different names from the main API. We need a
+// way to accommodate for this in both directions.
+
+// n.b. it may look like all this is doing is truncating names after a hyphen,
+// but this isn't generalizable, as there are plenty of hyphenated names (ex.
+// "ho-oh", "mr-mime") that *are*
+const nameToEvoName = new Map([
+  ["aegislash-shield", "aegislash"],
+  ["giratina-altered", "giratina"],
+  ["mimikyu-disguised", "mimikyu"],
+  ["deoxys-normal", "deoxys"],
+]);
+const evoNameToName = new Map();
+nameToEvoName.forEach(n => evoNameToName.set([nameToEvoName[n], n]));
+
+// PokeAPI also contains a bunch of data on new evolutions that PIF does not
+// have, so we'll have to either amend or delete them ourselves.
+const nameReplacementMap = new Map([
+  ["perrserker", null],
+  ["annihilape", "primeape"],
+  ["sirfetchd", "farfetchd"],
+  ["mr-rime", "mr-mime"],
+  ["kleavor", null],
+  ["clodsire", null],
+  ["farigiraf", "girafarig"],
+  ["dudunsparce", "dunsparce"],
+  ["overqwil", "qwilfish"],
+  ["sneaseler", null],
+  ["ursaluna", "ursaring"],
+  ["cursola", "corsola"],
+  ["wyrdeer", "stantler"],
+  ["kingambit", "bisharp"],
+  ["runerigus", null],
 ]);
 
-// Originally this data was fetched (from PokeAPI) and parsed per request;
-// this is not performant for either us or PokeAPI, so we'll load it into memory
-// as well.
-export const POKEMON_DATA = [];
+// This is just a cache of raw PokeAPI responses to be intaken and parsed on
+// app startup. Frontloading this work for significantly better app performance.
+const getAllPokemonData = async () => {
+  const names = Array.from(nameToId.keys());
 
-export const TYPE_NAMES = [
-  "normal",
-  "fire",
-  "water",
-  "grass",
-  "electric",
-  "ice",
-  "fighting",
-  "poison",
-  "ground",
-  "flying",
-  "psychic",
-  "bug",
-  "rock",
-  "ghost",
-  "dark",
-  "dragon",
-  "steel",
-  "fairy",
-]
+  const getPokeData = async (name, n) => {
+    console.log(`${name} (${n}/${names.length})`);
+    const pokeAPIRes = await fetch("https://pokeapi.co/api/v2/pokemon/" + name);
+    const pokeAPIJson = await pokeAPIRes.json();
 
-export interface PokemonStats {
-  attack: number;
-  defense: number;
-  speed: number;
-  "special-attack": number;
-  "special-defense": number;
-  hp: number;
-}
-
-export interface PokemonTypes {
-  firstType: string;
-  secondType: string | null;
-}
-
-export interface PokemonAbilities {
-  firstAbility: string;
-  secondAbility: string | null;
-  hiddenAbility: string | null;
-}
-
-export interface FusionArtURL {
-  url: string;
-  isCustom: boolean;
-}
-
-export interface PokemonDataEntry {
-  name: string;
-  id: string;
-  stats: PokemonStats;
-  types: PokemonTypes;
-  abilities: PokemonAbilities;
-  artUrl?: FusionArtURL;
-  fullyEvolved?: boolean;
-}
-
-export interface PokeAPIRes {
-  species: {
-    name: string;
-  };
-  stats: Array<{
-    base_stat: number;
-    stat: {
-      name: "attack" | "defense" | "speed" | "special-attack" | "special-defense" | "hp";
-    }
-  }>;
-  types: Array<{
-    type: {
-      name: string;
-    };
-  }>;
-  abilities: Array<{
-    ability: {
-      name: string;
-    };
-    is_hidden: boolean;
-    slot: number;
-  }>;
-}
-
-export interface FusionFilters {
-  customArtOnly: boolean;
-  typeOverride: Map<string, boolean>;
-  fullyEvolvedOnly: boolean;
-}
-
-// Some PIF mons are slightly different from the most recent Game Freak versions
-// of those mons. Any such differences are specified here and handled
-const statOverrideMap = new Map<string, PokemonStats>([
-  ["aegislash", {
-    attack: 50,
-    defense: 150,
-    speed: 60,
-    "special-attack": 50,
-    "special-defense": 150,
-    hp: 60,
-  }]
-]);
-
-const maybeGetStatOverride = (name: string): PokemonStats | null => {
-  const statOverride = statOverrideMap.get(name);
-  return statOverride ? statOverride : null;
-}
-
-const parsePokeAPI = (rawRes: PokeAPIRes): PokemonDataEntry => {
-  const name = rawRes.species.name as string;
-
-  const id = POKE_NAME_TO_ID.get(name) as string;
-
-  let stats: PokemonStats = {
-    attack: 0,
-    defense: 0,
-    speed: 0,
-    "special-attack": 0,
-    "special-defense": 0,
-    hp: 0
+    const cleanedObj = (({ species, stats, types, abilities }) => {
+      return {species, stats, types, abilities};
+    })(pokeAPIJson);
+    return [name, cleanedObj]
   }
-  const maybeOverride = maybeGetStatOverride(name);
-  if (maybeOverride) {
-    stats = maybeOverride;
+
+  const pokeDataMapping = [];
+  for (let i = 0; i < names.length; i++) {
+    const name = names[i];
+    pokeDataMapping.push(await getPokeData(name, i + 1));
+  }
+
+  console.log(`Acquired data for ${pokeDataMapping.length} Pokemon.`);
+  return JSON.stringify(pokeDataMapping);
+}
+
+const getAllFinalEvos = async () => {
+  const names = new Set(nameToId.keys());
+  nameToEvoName.forEach((evoName, ogName) => {
+    names.delete(ogName);
+    names.add(evoName);
+  });
+  
+  const pokeAPIEvoTreeLinks = new Set();
+  const cacheEvoURL = async (name, n) => {
+    console.log(`${name} (${n}/${names.size})`);
+    const pokeAPIRes = await fetch("https://pokeapi.co/api/v2/pokemon-species/" + name);
+    const pokeAPIJson = await pokeAPIRes.json();
+    const evoURL = pokeAPIJson["evolution_chain"]["url"];
+    pokeAPIEvoTreeLinks.add(evoURL);
+  }
+  
+  const findTerminalEvosRecursive = (currentNode) => {
+    const nextEvos = currentNode["evolves_to"];
+    if (!nextEvos.length) {
+      return [currentNode.species.name];
+    }
+   
+    const evoArray = [];
+    nextEvos.forEach(nextNode => {
+      const evos = findTerminalEvosRecursive(nextNode);
+      evoArray.push(...evos);
+    });
+    return evoArray;
+  }
+
+
+  // Retrieve necessary request URLs
+  let i = 1;
+  for (const name of names) {
+    await cacheEvoURL(name, i);
+    i++;
+  }
+  
+  // Recurse to find terminal evolution nodes
+  const terminalEvos = new Set();
+  for (const evoLink of pokeAPIEvoTreeLinks) {
+    console.log("Processing " + evoLink);
+    const pokeAPIRes = await fetch(evoLink);
+    const evoChain = (await pokeAPIRes.json()).chain;
+    const evos = findTerminalEvosRecursive(evoChain);
+    evos.forEach(e => terminalEvos.add(e));
+  }
+
+  // Clean up names, per above
+  const terminalEvosClean = [];
+  for (const evo of terminalEvos) {
+    const evoNameOverride = evoNameToName.get(evo);
+    const invalidEvoOverride = nameReplacementMap.get(evo);
+
+    if (invalidEvoOverride === null) {
+      // This is a branched evolution that doesn't exist in PIF; simply ignore
+      // it and move on.
+      continue;
+    }
+
+    terminalEvosClean.push(evoNameOverride || invalidEvoOverride || evo);
+  }
+
+  console.log(terminalEvosClean);
+  return JSON.stringify(terminalEvosClean);
+}
+
+
+const postWriteFeedback = (err) => {
+  if (err) {
+    console.error(err);
   } else {
-    rawRes.stats.forEach(st => stats[st.stat.name] = st.base_stat);
+    console.log("Write complete.");
   }
-
-  const types: PokemonTypes = {
-    firstType: rawRes.types[0].type.name as string,
-    secondType: ""
-  }
-  if (rawRes.types.length > 1) {
-    types.secondType = rawRes.types[1].type.name as string;
-  }
-
-  const abilities: PokemonAbilities = {
-    firstAbility: "",
-    secondAbility: null,
-    hiddenAbility: null,
-  }
-  rawRes.abilities.forEach(a => {
-    const abilityName = a.ability.name;
-    if (a.is_hidden) {
-      abilities.hiddenAbility = abilityName;
-    } else if (a.slot !== 1) {
-      abilities.secondAbility = abilityName;
-    } else {
-      abilities.firstAbility = abilityName;
-    }
-  })
-
-  return {
-    name,
-    id,
-    stats,
-    types,
-    abilities
-  };
 }
+
+(async () => {
+  const [updateDataDump, updateFinalEvos] = [false, false];
+
+  // Fetch Pokemon data
+  if (updateDataDump) {
+    const pokeData = await getAllPokemonData();
+    writeFile(join(__dirname, "pokeData.json"), pokeData, postWriteFeedback);
+  }
+
+  // Fetch evolution data
+  if (updateFinalEvos) {
+    const finalEvos = await getAllFinalEvos();
+    writeFile(join(__dirname, "finalEvos.json"), finalEvos, postWriteFeedback);
+  }
+})();
