@@ -14,7 +14,16 @@ const FusionInput: React.FC<FusionInputProps> = (props) => {
 
   // TOOD: add autocompletion
   return (
-    <input type="text" value={currentInput} onChange={handleChange} />
+    <>
+      <label htmlFor="primary-fusion-input">Pokémon of Interest</label>
+      <br />
+      <input
+        type="text"
+        id="primary-fusion-input"
+        value={currentInput}
+        onChange={handleChange}
+        />
+      </>
   );
 }
 

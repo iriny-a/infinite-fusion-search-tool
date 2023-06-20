@@ -35,7 +35,7 @@ const FusionTable: React.FC<FusionTableProps> = (props) => {
   const { currentMon, filters, pokeData, fullyEvolvedList } = props;
 
   if (!currentMon) {
-    return null;
+    return <FusionTableNone />;
   }
 
   // Mostly here just for safety; it should be impossible to reach this
@@ -65,7 +65,7 @@ const FusionTableHandler: React.FC<FusionTableHandlerProps> = (props) => {
   const [ fusionDataFiltered, setFusionDataFiltered ] = useState<PokemonDataEntry[]>([]);
   const [ status, setStatus ] = useState<LoadingStatus>(LoadingStatus.None);
 
-  // Fetching art and computing fusions
+  // Fetch art and compute fusions
   useEffect(() => {
     const currentMonData = pokeData.get(currentMon);
     if (!currentMonData) {
@@ -98,14 +98,17 @@ const FusionTableHandler: React.FC<FusionTableHandlerProps> = (props) => {
         worker.terminate();
       }
 
-      // Rate limit worker rollout
+      // Slightly rate limit worker rollout
       (async (ms) => await new Promise(resolve => setTimeout(resolve, ms)))(50);
     }
 
     return (() => workerPool.forEach(w => w.terminate()));
+  // We explicitly do not want status as a dependency here; this hook is ONLY
+  // supposed to run when a new Pokemon is requested.
+  // eslint-disable-next-line
   }, [currentMon, fullyEvolvedList, pokeData]);
 
-  // Filtering (TODO: sorting)
+  // Filter (TODO: sort)
   useEffect(() => {
     // We want to let Processing through for obvious reasons, but we also want
     // to let Done through. This is because the only time this hook will trigger
@@ -114,8 +117,11 @@ const FusionTableHandler: React.FC<FusionTableHandlerProps> = (props) => {
       return;
     }
 
+    // Default sort
+    let filteredPairs = fusionData.sort((p1, p2) => p1.inputId - p2.inputId);
+
     // NFE filter
-    const filteredPairs = fusionData.filter(dt => {
+    filteredPairs = filteredPairs.filter(dt => {
       // TODO: probably move the evolution info into the Pairs interface, it's
       // pretty hacky like this.
       return !filters.fullyEvolvedOnly || dt.headBody.fullyEvolved;
@@ -150,8 +156,9 @@ const FusionTableHandler: React.FC<FusionTableHandlerProps> = (props) => {
 
     setFusionDataFiltered(filteredData);
     setStatus(LoadingStatus.Done);
-  }, [fusionData, filters]);
+  }, [fusionData, filters, status]);
 
+  // Render
   switch (status) {
     case LoadingStatus.Fetching:
       if (fusionData.length >= NUMBER_OF_POKEMON) {
@@ -162,14 +169,109 @@ const FusionTableHandler: React.FC<FusionTableHandlerProps> = (props) => {
     case LoadingStatus.Processing:
       return <FusionTableLoading status={status} />;
 
-      case LoadingStatus.Done:
-        return <FusionTableRender fusionData={fusionDataFiltered} />;
+    case LoadingStatus.Done:
+      return <FusionTableRender fusionData={fusionDataFiltered} />;
 
-      case LoadingStatus.None:
-      default:
-        return null;
+    case LoadingStatus.None:
+    default:
+      return null;
   }
 }
+
+
+const FusionTableNone: React.FC = () => {
+  return <div id="no-pokemon-msg">Enter a primary Pokémon to view results.</div>;
+}
+
+interface FusionTableLoadingProps {
+  status: LoadingStatus;
+  count?: number;
+}
+const FusionTableLoading: React.FC<FusionTableLoadingProps> = (props) => {
+  const { status, count } = props;
+
+  if (status === LoadingStatus.Processing || (count && count + 1 === NUMBER_OF_POKEMON)) {
+    return (
+      <div className="loading">
+        Sorting and processing fusions...
+        <FusionTableProgressBar count={NUMBER_OF_POKEMON} />
+      </div>
+      
+    );
+  }
+
+  if (status === LoadingStatus.Fetching) {
+    return (
+      <div className="loading">
+        Loading fusions... ({count ? count + 1 : 0}/{NUMBER_OF_POKEMON})
+        <FusionTableProgressBar count={count ? count + 1 : 0 } />
+      </div>
+    );
+  }
+  
+  return null;
+}
+
+
+interface FusionTableProgressBarProps {
+  count: number;
+}
+const FusionTableProgressBar: React.FC<FusionTableProgressBarProps> = (props) => {
+  const { count } = props;
+
+  return (
+    <div id="progress-bar">
+      <div id="progress-bar-completed" style={{width: `${count / NUMBER_OF_POKEMON * 100}%`}}></div>
+    </div>
+  )
+}
+
+
+interface FusionTableRenderProps {
+  fusionData: PokemonDataEntry[];
+}
+const FusionTableRender: React.FC<FusionTableRenderProps> = (props) => {
+  const { fusionData } = props;
+
+  const tableRows: JSX.Element[] = [];
+  fusionData.forEach(f => {
+    if (f) {
+      tableRows.push(<FusionTableRow key={f.id} data={f} />);
+    } else {
+      console.log(f);
+    }
+  });
+
+  return (
+    <div id="fusion-table-container">
+      <h2>Search Results ({fusionData.length} found)</h2>
+      <table id="fusion-table">
+        <thead id="fusion-table-head">
+          <tr>
+            <th>Dex No.</th>
+            <th>Name</th>
+            <th>Art</th>
+            <th>Atk</th>
+            <th>Def</th>
+            <th>Spe</th>
+            <th>SpA</th>
+            <th>SpD</th>
+            <th>HP</th>
+            <th>Typing</th>
+            <th>Abilities</th>
+            <th>Other Abilities</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {tableRows}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export default FusionTable;
 
 
 const weightStat = (higher: number, lower: number): number => {
@@ -237,58 +339,3 @@ const getFusionData = (
 
   return fusionData;
 }
-
-
-interface FusionTableLoadingProps {
-  status: LoadingStatus;
-  count?: number;
-}
-const FusionTableLoading: React.FC<FusionTableLoadingProps> = (props) => {
-  const { status, count } = props;
-
-  if (status === LoadingStatus.Processing || (count && count + 1 === NUMBER_OF_POKEMON)) {
-    return <>Sorting and processing fusions...</>;
-  }
-
-  if (status === LoadingStatus.Fetching && count) {
-    return <>Loading fusions... ({count + 1}/{NUMBER_OF_POKEMON})</>;
-  }
-  
-  return null;
-}
-
-
-interface FusionTableRenderProps {
-  fusionData: PokemonDataEntry[];
-}
-const FusionTableRender: React.FC<FusionTableRenderProps> = (props) => {
-  const { fusionData } = props;
-
-  const tableRows: JSX.Element[] = [];
-  fusionData.forEach(f => {
-    if (f) {
-      tableRows.push(<FusionTableRow key={f.id} data={f} />);
-    } else {
-      console.log(f);
-    }
-  });
-
-  return (
-    <table>
-      <tbody>
-        <tr>
-          <th>Dex No.</th>
-          <th>Name</th>
-          <th>Art</th>
-          <th>Stats</th>
-          <th>Typing</th>
-          <th>Abilities</th>
-          <th>Other Abilities</th>
-        </tr>
-        {tableRows}
-      </tbody>
-    </table>
-  );
-}
-
-export default FusionTable;

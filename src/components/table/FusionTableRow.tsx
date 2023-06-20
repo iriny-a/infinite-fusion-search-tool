@@ -1,6 +1,6 @@
 import React from "react";
 
-import { PokemonDataEntry } from "../../data/data";
+import { PokemonDataEntry, TYPE_NAMES } from "../../data/data";
 import capitalize from "../shared/capitalize";
 
 
@@ -45,57 +45,36 @@ const FusionTableRow: React.FC<FusionTableRowProps> = (props) => {
       </td>
 
       <td>
-        <table>
-          <tbody>
-            <tr>
-              <td>
-                {data.stats.attack}
-              </td>
-            </tr>
-            <tr>
-              <td>
-                {data.stats.defense}
-              </td>
-            </tr>
-            <tr>
-              <td>
-                {data.stats.speed}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <table>
-          <tbody>
-            <tr>
-              <td>
-                {data.stats["special-attack"]}
-              </td>
-            </tr>
-            <tr>
-              <td>
-                {data.stats["special-defense"]}
-              </td>
-            </tr>
-            <tr>
-              <td>
-                {data.stats.hp}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        {data.stats.attack}
+      </td>
+      <td>
+        {data.stats.defense}
+      </td>
+      <td>
+        {data.stats.speed}
       </td>
 
       <td>
+        {data.stats["special-attack"]}
+      </td>
+      <td>
+        {data.stats["special-defense"]}
+      </td>
+      <td>
+        {data.stats.hp}
+      </td>
+
+      <td className="type-column">
         <table>
           <tbody>
             <tr>
               <td>
-                {capitalize(data.types.firstType)}
+                <img className="type-icon" src={getTypeIcon(data.types.firstType)} />
               </td>
             </tr>
             <tr>
               <td>
-                {data.types.secondType ? capitalize(data.types.secondType) : ""}
+                {data.types.secondType ? <img className="type-icon" src={getTypeIcon(data.types.secondType)} />: null}
               </td>
             </tr>
           </tbody>
@@ -147,6 +126,13 @@ const FusionTableRow: React.FC<FusionTableRowProps> = (props) => {
       </td>
     </tr>
   );
+}
+
+const getTypeIcon = (type: string): string => {
+  if (TYPE_NAMES.includes(type)) {
+    return `./icons/${type}.png`;
+  }
+  return `./icons/unknown.png`;
 }
 
 export default FusionTableRow;

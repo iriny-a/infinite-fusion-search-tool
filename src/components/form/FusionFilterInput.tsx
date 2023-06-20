@@ -56,21 +56,23 @@ const FusionFilterInput: React.FC<FusionFilterInputProps> = (props) => {
       </div>
 
       <label>Include only selected types:</label>
-      {
-        TYPE_NAMES.map(t => (
-          <div key={`type-${t}`}>
-            <input type="checkbox"
-              name={t}
-              onChange={e => handleTypeFilterChange(e, t)}
-            />
-            <label htmlFor={t}>{capitalize(t)}</label>
-          </div>
-        ))
-      }
+      <div id="type-filter-container">
+        {
+          TYPE_NAMES.map(t => (
+            <div key={`type-${t}`}>
+              <input type="checkbox"
+                name={t}
+                onChange={e => handleTypeFilterChange(e, t)}
+                />
+              <label htmlFor={t}>{capitalize(t)}</label>
+            </div>
+          ))
+        }
+      </div>
     </form>
 
     
   );
 }
 
-export default FusionFilterInput
+export default FusionFilterInput;

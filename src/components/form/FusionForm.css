@@ -1,0 +1,12 @@
+
+
+#primary-input-form {
+  text-align: center;
+}
+
+#type-filter-container {
+  display: flex;
+  flex-direction: column;
+  height: 8rem;
+  flex-wrap: wrap;
+}

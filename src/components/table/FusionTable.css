@@ -1,3 +1,70 @@
-td {
-  border: solid blue 1px;
+table {
+  border-spacing: 0;
+  box-sizing: border-box;
 }
+td {
+  outline: solid #ccc 1px;
+}
+
+th {
+  border: solid #ccc 1px; /* floating heading needs border, not outline */
+  margin: 0;
+}
+
+#app-title {
+  text-align: center;
+}
+
+#fusion-table-container {
+  margin: 2rem auto;
+  width: 100%;
+  position: absolute;
+  top: 0;
+
+  text-align: center;
+}
+
+#fusion-table {
+  margin: 0 auto;
+}
+
+#fusion-table-head th {
+  background-color: #222;
+  position: sticky;
+  top: 0;
+}
+
+.loading {
+  font-size: large;
+  width: 80%;
+  text-align: center;
+}
+
+#progress-bar {
+  display: flex;
+  justify-content: left;
+  align-items: stretch;
+  margin: 1rem auto;
+  height: 0.6rem;
+  width: 40%;
+  max-width: 30rem;
+
+  border-radius: 5px;
+  outline: solid cyan 1px;
+}
+
+#progress-bar-completed {
+  height: 100%;
+
+  background-color: cyan;
+  border-radius: inherit/0;
+}
+
+.type-column {
+  width: 6rem;
+}
+
+.type-icon {
+  width: 100%;
+}
+

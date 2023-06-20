@@ -1,0 +1,66 @@
+:root {
+  background-color: #222;
+  color: #ddd;
+}
+
+body, html {
+  height: 100%;
+}
+
+#app-container {
+  display: flex;
+  align-items: stretch;
+  overflow-y: hidden;
+
+  min-height: 100vh;
+  max-height: 100vh;
+  box-sizing: border-box;
+}
+
+#info-and-input-panel {
+  width: 30%;
+  margin: 0;
+  padding: 2rem;
+
+  overflow-y: auto;
+  
+  box-sizing: border-box;
+  border-right: solid #ccc 2px;
+}
+
+#fusion-table-panel {
+  width: 70%;
+  margin: 2rem;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-y: auto;
+  position: relative;
+
+  box-sizing: border-box;
+  border-left: solid ccc 2px;
+}
+
+#app-info {
+  margin: 0 auto;
+  max-width: 50rem;
+
+  text-align: center;
+}
+
+a {
+  color: #0ff;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+a:visited {
+  color: #0f0;
+}
+
+hr.section-break {
+  width: 60%;
+  margin: 2rem auto 2rem;
+  border-color: #999;
+}

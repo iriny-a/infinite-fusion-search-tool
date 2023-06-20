@@ -5,6 +5,8 @@ import FusionInput from "./FusionInput";
 import { FusionFilters, POKE_NAME_TO_ID } from "../../data/data";
 import FusionFilterInput from "./FusionFilterInput";
 
+import "./FusionForm.css";
+
 
 interface FusionFormProps {
   currentMon: string | undefined;
@@ -32,14 +34,14 @@ const FusionForm: React.FC<FusionFormProps> = (props) => {
 
   return (
     <>
-      <form onSubmit={handleSubmitPokemon}>
+      <form onSubmit={handleSubmitPokemon} id="primary-input-form">
         <FusionInput
           currentInput={currentInput}
           setCurrentInput={setCurrentInput}
         />
-        <input type="submit" value="hi" />
+        <input type="submit" value="Search" />
       </form>
-      
+
       <FusionFilterInput
         filters={filters}
         setFilters={setFilters}
