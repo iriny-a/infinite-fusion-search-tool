@@ -20,7 +20,7 @@ const FusionForm: React.FC<FusionFormProps> = (props) => {
   const handleSubmitPokemon = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const maybePokemon = currentInput.toLowerCase();
+    const maybePokemon = currentInput.toLowerCase().trim();
 
     if (POKE_NAME_TO_ID.get(maybePokemon) === undefined) {
       alert(`No Pokemon named "${currentInput}" could be found :(`);
@@ -36,9 +36,10 @@ const FusionForm: React.FC<FusionFormProps> = (props) => {
         <FusionInput
           currentInput={currentInput}
           setCurrentInput={setCurrentInput}
-          />
+        />
         <input type="submit" value="hi" />
       </form>
+      
       <FusionFilterInput
         filters={filters}
         setFilters={setFilters}

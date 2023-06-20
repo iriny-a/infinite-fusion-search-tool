@@ -16,6 +16,7 @@ export interface PokemonAbilities {
   firstAbility: string;
   secondAbility: string | null;
   hiddenAbility: string | null;
+  otherAbilities?: Array<string>;
 }
 
 export interface FusionArtURL {
@@ -61,6 +62,19 @@ export interface FusionFilters {
   customArtOnly: boolean;
   typeOverride: Map<string, boolean>;
   fullyEvolvedOnly: boolean;
+}
+
+export interface FusionPair {
+  baseMon: string;
+  inputMon: string;
+  inputId: number; // numerical for better sorting
+  headBody: PokemonDataEntry;
+  bodyHead: PokemonDataEntry;
+}
+
+export interface ArtWorkerMessage {
+  headBodyArt: FusionArtURL;
+  bodyHeadArt: FusionArtURL;
 }
 
 // Mapping is needed since PIF ids are different from national dex numbers.

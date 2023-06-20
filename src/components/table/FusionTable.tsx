@@ -2,21 +2,37 @@ import React, { useState, useEffect } from "react";
 
 import FusionTableRow from "./FusionTableRow";
 
-import { FusionArtURL, FusionFilters, PokemonDataEntry, POKE_NAME_TO_ID } from "../../data/data";
+import {
+  FusionFilters,
+  PokemonDataEntry,
+  POKE_NAME_TO_ID,
+  PokemonTypes,
+  PokemonAbilities,
+  FusionPair,
+  ArtWorkerMessage
+} from "../../data/data";
 
 import "./FusionTable.css";
+import capitalize from "../shared/capitalize";
+
+const NUMBER_OF_POKEMON = POKE_NAME_TO_ID.size;
 
 
-const NUMBER_OF_BASE_POKEMON = 20; // PokemonNameToId.size;
-const AEGIDE_CUSTOM_URL = "https://raw.githubusercontent.com/Aegide/custom-fusion-sprites/main/CustomBattlers/";
-const AEGIDE_AUTOGEN_URL = "https://raw.githubusercontent.com/Aegide/autogen-fusion-sprites/master/Battlers/";
+enum LoadingStatus {
+  None,       // do not render any table whatsoever
+  Fetching,   // art assets are being fetched from Aegide
+  Processing, // sorting and filtering
+  Done,       // self explanatory
+}
 
 interface FusionTableProps {
   currentMon: string | undefined;
   filters: FusionFilters;
+  pokeData: Map<string, PokemonDataEntry>;
+  fullyEvolvedList: Set<string>;
 }
 const FusionTable: React.FC<FusionTableProps> = (props) => {
-  const { currentMon, filters } = props;
+  const { currentMon, filters, pokeData, fullyEvolvedList } = props;
 
   if (!currentMon) {
     return null;
@@ -31,6 +47,8 @@ const FusionTable: React.FC<FusionTableProps> = (props) => {
   return <FusionTableHandler
     currentMon={currentMon}
     filters={filters}
+    pokeData={pokeData}
+    fullyEvolvedList={fullyEvolvedList}
   />
 }
 
@@ -38,134 +56,222 @@ const FusionTable: React.FC<FusionTableProps> = (props) => {
 interface FusionTableHandlerProps {
   currentMon: string;
   filters: FusionFilters;
+  pokeData: Map<string, PokemonDataEntry>;
+  fullyEvolvedList: Set<string>;
 }
 const FusionTableHandler: React.FC<FusionTableHandlerProps> = (props) => {
-  const { currentMon, filters } = props;
-  const [ currentMonData, setCurrentMonData ] = useState<PokemonDataEntry>();
-  const [ allLoaded, setAllLoaded ] = useState<boolean>(false);
-  const [ fusionData, setFusionData ] = useState<PokemonDataEntry[][]>([]);
-  const [ fusionDataFinal, setFusionDataFinal ] = useState<PokemonDataEntry[]>([]);
+  const { currentMon, filters, pokeData, fullyEvolvedList } = props;
+  const [ fusionData, setFusionData ] = useState<FusionPair[]>([]);
+  const [ fusionDataFiltered, setFusionDataFiltered ] = useState<PokemonDataEntry[]>([]);
+  const [ status, setStatus ] = useState<LoadingStatus>(LoadingStatus.None);
 
+  // Fetching art and computing fusions
   useEffect(() => {
-    setFusionData([]);
-    setCurrentMonData(undefined);
-  }, [currentMon]);
-
-  useEffect(() => {
-    if (fusionData.length < NUMBER_OF_BASE_POKEMON) {
-      if (allLoaded) {
-        setAllLoaded(false);
-      }
-
-      // Needs to be completely rewritten for the new data schematic
+    const currentMonData = pokeData.get(currentMon);
+    if (!currentMonData) {
+      return;
     }
 
-    filterFusions();
-    setAllLoaded(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentMonData, fusionData]);
+    if (status !== LoadingStatus.Fetching) {
+      setStatus(LoadingStatus.Fetching);
+    }
+    setFusionData([]);
 
+    const workerPool: Array<Worker> = [];
+    for (const [name, data] of pokeData) {
+      const worker = new Worker("artWorker.js");
+      workerPool.push(worker);
+      worker.postMessage({baseId: currentMonData.id, inputId: data.id});
+      worker.onmessage = (e: MessageEvent) => {
+        const artRes = e.data as ArtWorkerMessage;
+        const pair = {
+          baseMon: currentMon,
+          inputMon: name,
+          inputId: parseInt(data.id),
+          headBody: getFusionData(currentMonData, data, "body", fullyEvolvedList),
+          bodyHead: getFusionData(data, currentMonData, "head", fullyEvolvedList),
+        }
+        pair.headBody.artUrl = artRes.headBodyArt;
+        pair.bodyHead.artUrl = artRes.bodyHeadArt;
+
+        setFusionData(prev => [...prev, pair]);
+        worker.terminate();
+      }
+
+      // Rate limit worker rollout
+      (async (ms) => await new Promise(resolve => setTimeout(resolve, ms)))(50);
+    }
+
+    return (() => workerPool.forEach(w => w.terminate()));
+  }, [currentMon, fullyEvolvedList, pokeData]);
+
+  // Filtering (TODO: sorting)
   useEffect(() => {
-    filterFusions();
-  }, [filters]);
+    // We want to let Processing through for obvious reasons, but we also want
+    // to let Done through. This is because the only time this hook will trigger
+    // when the status is Done is when the filters are updated.
+    if (status !== LoadingStatus.Processing && status !== LoadingStatus.Done) {
+      return;
+    }
 
-  if (!allLoaded) {
-    return <FusionTableLoading count={fusionData.length} />;
-  }
-
-  return (
-    <FusionTableRender
-      fusionData={fusionData}
-    />
-  );
-}
-
-const getArtURL = async (headId: string, bodyId: string): Promise<FusionArtURL> => {
-  const aegideURL = AEGIDE_CUSTOM_URL + `${headId}.${bodyId}.png`;
-  const maybeAegideRes = await fetch(aegideURL);
-  if (maybeAegideRes.status === 200) {
-    return {
-      url: aegideURL,
-      isCustom: true,
-    };
-  }
-  return {
-    url: AEGIDE_AUTOGEN_URL + `${bodyId}/${bodyId}.${headId}.png`,
-    isCustom: false,
-  };
+    // NFE filter
+    const filteredPairs = fusionData.filter(dt => {
+      // TODO: probably move the evolution info into the Pairs interface, it's
+      // pretty hacky like this.
+      return !filters.fullyEvolvedOnly || dt.headBody.fullyEvolved;
+    });
     
+    // Custom art filter
+    let filteredData: PokemonDataEntry[] = [];
+    filteredPairs.forEach(p => {
+      if (!filters.customArtOnly || p.headBody.artUrl?.isCustom) {
+        filteredData.push(p.headBody);
+      }
+      if (p.baseMon !== p.inputMon && (!filters.customArtOnly || p.bodyHead.artUrl?.isCustom)) {
+        filteredData.push(p.bodyHead);
+      }
+    });
+
+    // Typing filter
+    const typingFilterOverride = (
+      // typing filter is empty
+      !filters.typeOverride.size
+      // typing filter used to have items but they were all deselected
+      || Array.from(filters.typeOverride.values()).every(f => f === false)
+    );
+    filteredData = filteredData.filter(dt => {
+      if (typingFilterOverride) {
+        return true;
+      }
+
+      return (filters.typeOverride.get(dt.types.firstType)
+      || filters.typeOverride.get(dt.types.secondType as string));
+    });
+
+    setFusionDataFiltered(filteredData);
+    setStatus(LoadingStatus.Done);
+  }, [fusionData, filters]);
+
+  switch (status) {
+    case LoadingStatus.Fetching:
+      if (fusionData.length >= NUMBER_OF_POKEMON) {
+        setStatus(LoadingStatus.Processing);
+      }
+      return <FusionTableLoading status={status} count={fusionData.length} />;
+
+    case LoadingStatus.Processing:
+      return <FusionTableLoading status={status} />;
+
+      case LoadingStatus.Done:
+        return <FusionTableRender fusionData={fusionDataFiltered} />;
+
+      case LoadingStatus.None:
+      default:
+        return null;
+  }
 }
 
-const getFusionData = async (baseMonData: PokemonDataEntry, inputMon: string): /* Promise<PokemonDataEntry[]> */ Promise<void> => {
-  // This needs to be completely rewritten for the new local data cache.
 
-  /*
-  // First, fetch and parse data for the input mon
-  const pokeAPIRes = await fetch(`https://pokeapi.co/api/v2/pokemon/${inputMon}`);
-  const pokeAPIJson = await pokeAPIRes.json();
-  const inputMonData = parsePokeAPI(pokeAPIJson);
-
-  // This is really, really clunky in PokeAPI for some reason... can explore a
-  // better method for this later
-  const pokeAPISpeciesRes = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${inputMon}`);
-  const pokeAPISpeciesJson = await pokeAPISpeciesRes.json();
-  const evoChainURL = pokeAPISpeciesJson.evolution_chain.url as string;
-  const pokeAPIEvoChainRes = await fetch(evoChainURL);
-  const pokeAPIEvoChainJson = await pokeAPIEvoChainRes.json();
-  let evoChain = pokeAPIEvoChainJson.chain;
-
-  // Perform fusion in both directions
-  // mostly placeholder for now, to ensure functionality
-  const baseInputFusion: PokemonDataEntry = {
-    ...baseMonData,
-    name: `${baseMonData.name}/${inputMonData.name}`,
-    artUrl: await getArtURL(baseMonData.id, inputMonData.id),
-    id: `${baseMonData.id} + ${inputMonData.id}`,
-  }
-  if (baseMonData.name === inputMon) {
-    return [baseInputFusion];
-  }
-
-  const inputBaseFusion: PokemonDataEntry = {
-    ...inputMonData,
-    name: `${inputMonData.name}/${baseMonData.name}`,
-    artUrl: await getArtURL(inputMonData.id, baseMonData.id),
-    id: `${inputMonData.id} + ${baseMonData.id}`,
-  }
-
-  return [baseInputFusion, inputBaseFusion];
-  */
+const weightStat = (higher: number, lower: number): number => {
+  return Math.floor((higher * 2 + lower) / 3);
 }
 
-const filterFusions = (filters?: FusionFilters): PokemonDataEntry[] => {
+const getFusionTyping = (
+  headTypes: PokemonTypes,
+  bodyTypes: PokemonTypes
+  ): PokemonTypes => {
+  // Most fusions will take head's primary type and body's secondary type
+  const fusionTyping: PokemonTypes = {
+    firstType: headTypes.firstType,
+    secondType: bodyTypes.secondType
+  }
+  // TODO: overrides, exceptions, and edge cases
 
-  return [];
+  return fusionTyping;
+}
+
+const getFusionAbilities = (
+   headAbilities: PokemonAbilities,
+   bodyAbilities: PokemonAbilities
+   ): PokemonAbilities => {
+  // Most fusions will take head's second ability or body's first ability
+  const fusionAbilities: PokemonAbilities = {
+    firstAbility: bodyAbilities.firstAbility,
+    secondAbility: headAbilities.secondAbility,
+    hiddenAbility: null,
+  }
+  // TODO: overrides, exceptions, edge cases, and HA
+
+  return fusionAbilities;
+}
+
+const getFusionData = (
+  headData: PokemonDataEntry,
+  bodyData: PokemonDataEntry,
+  inputMon: "head" | "body",
+  fullyEvolvedList: Set<string>
+  ): PokemonDataEntry => {
+  const fusionData: PokemonDataEntry = {
+    name: `${capitalize(headData.name)}/${capitalize(bodyData.name)}`,
+    id: `${headData.id}.${bodyData.id}`,
+    stats: {
+      // weighted by body
+      attack: weightStat(bodyData.stats.attack, headData.stats.attack),
+      defense: weightStat(bodyData.stats.defense, headData.stats.defense),
+      speed: weightStat(bodyData.stats.speed, headData.stats.speed),
+
+      // weighted by head
+      "special-attack": weightStat(headData.stats["special-attack"], bodyData.stats["special-attack"]),
+      "special-defense": weightStat(headData.stats["special-defense"], bodyData.stats["special-defense"]),
+      hp: weightStat(headData.stats.hp, bodyData.stats.hp),
+    },
+    types: getFusionTyping(headData.types, bodyData.types),
+    abilities: getFusionAbilities(headData.abilities, bodyData.abilities),
+    // We want fully evolved status to be a useful table-wide filter, so we need
+    // to know which mon to consider the fully evolved status of. This is a bit
+    // counterintuitive since it's not how the game considers mons to be fully
+    // evolved, but if we don't do this, it's impossible to filter on this
+    // criteria if the input mon isn't fully evolved.
+    fullyEvolved: inputMon === "head" ? fullyEvolvedList.has(headData.name) : fullyEvolvedList.has(bodyData.name),
+  }
+
+  return fusionData;
 }
 
 
 interface FusionTableLoadingProps {
-  count: number;
+  status: LoadingStatus;
+  count?: number;
 }
 const FusionTableLoading: React.FC<FusionTableLoadingProps> = (props) => {
-  const { count } = props;
+  const { status, count } = props;
 
-  return <>Loading fusions... ({count + 1}/420)</>;
+  if (status === LoadingStatus.Processing || (count && count + 1 === NUMBER_OF_POKEMON)) {
+    return <>Sorting and processing fusions...</>;
+  }
+
+  if (status === LoadingStatus.Fetching && count) {
+    return <>Loading fusions... ({count + 1}/{NUMBER_OF_POKEMON})</>;
+  }
+  
+  return null;
 }
 
+
 interface FusionTableRenderProps {
-  fusionData: PokemonDataEntry[][];
+  fusionData: PokemonDataEntry[];
 }
 const FusionTableRender: React.FC<FusionTableRenderProps> = (props) => {
   const { fusionData } = props;
 
   const tableRows: JSX.Element[] = [];
-  fusionData.forEach(pair => pair.forEach(f => {
+  fusionData.forEach(f => {
     if (f) {
       tableRows.push(<FusionTableRow key={f.id} data={f} />);
     } else {
-      console.log(pair);
+      console.log(f);
     }
-  }));
+  });
 
   return (
     <table>

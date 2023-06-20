@@ -14,14 +14,14 @@ const FusionFilterInput: React.FC<FusionFilterInputProps> = (props) => {
     setFilters({
       ...filters,
       customArtOnly: !filters.customArtOnly,
-    })
+    });
   }
 
   const handleFullyEvolvedCheck = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilters({
       ...filters,
       fullyEvolvedOnly: !filters.fullyEvolvedOnly,
-    })
+    });
   }
 
   const handleTypeFilterChange = (e: React.ChangeEvent<HTMLInputElement>, t: string) => {

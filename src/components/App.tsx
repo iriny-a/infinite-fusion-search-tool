@@ -44,6 +44,9 @@ const App: React.FC = () => {
       <FusionTable
         currentMon={currentMon}
         filters={filters}
+
+        pokeData={pokeData}
+        fullyEvolvedList={fullyEvolvedList}
       />
     </>
   );

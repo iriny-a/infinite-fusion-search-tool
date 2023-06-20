@@ -429,7 +429,7 @@ const nameToId = new Map([
 
 // n.b. it may look like all this is doing is truncating names after a hyphen,
 // but this isn't generalizable, as there are plenty of hyphenated names (ex.
-// "ho-oh", "mr-mime") that *are*
+// "ho-oh", "mr-mime") that *are* valid.
 const nameToEvoName = new Map([
   ["aegislash-shield", "aegislash"],
   ["giratina-altered", "giratina"],
