@@ -31,6 +31,7 @@ const App: React.FC = () => {
   const [ filters, setFilters ] = useState<FusionFilters>(getDefaultFilters());
   const [ pokeData, setPokeData ] = useState<Map<string, PokemonDataEntry> | null>(null);
   const [ fullyEvolvedList, setFullyEvolvedList ] = useState<Set<string> | null>(null);
+  const [ isFormEnabled, setIsFormEnabled ] = useState<boolean>(true);
 
   useEffect(() => {
     (async () => {
@@ -41,7 +42,6 @@ const App: React.FC = () => {
 
   const resetFilters = () => {
     setFilters(getDefaultFilters());
-    console.log("reset?", filters)
   }
 
   if (pokeData === null || fullyEvolvedList === null) {
@@ -58,15 +58,22 @@ const App: React.FC = () => {
         <hr className="section-break" />
 
         <FusionForm
+          isFormEnabled={isFormEnabled}
+          setIsFormEnabled={setIsFormEnabled}
+          currentMon={currentMon}
           setCurrentMon={setCurrentMon}
           filters={filters}
           setFilters={setFilters}
           resetFilters={resetFilters}
+
+          pokeData={pokeData}
         />
       </div>
 
       <div id="fusion-table-panel">
         <FusionTable
+          isFormEnabled={isFormEnabled}
+          setIsFormEnabled={setIsFormEnabled}
           currentMon={currentMon}
           filters={filters}
           
@@ -103,7 +110,7 @@ const Info: React.FC = () => {
       </p>
       <p>
         Please contact me on either GitHub or Discord (@irinya) with any
-        questions, issues, or requests.
+        questions, issues, requests, or bug reports.
       </p>
     </div>
   )

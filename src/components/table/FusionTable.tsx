@@ -26,12 +26,15 @@ enum LoadingStatus {
 }
 
 interface FusionTableProps {
+  isFormEnabled: boolean;
+  setIsFormEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   currentMon: string | undefined;
   filters: FusionFilters;
   pokeData: Map<string, PokemonDataEntry>;
   fullyEvolvedList: Set<string>;
 }
 const FusionTable: React.FC<FusionTableProps> = (props) => {
+  const { isFormEnabled, setIsFormEnabled } = props;
   const { currentMon, filters, pokeData, fullyEvolvedList } = props;
 
   if (!currentMon) {
@@ -45,6 +48,8 @@ const FusionTable: React.FC<FusionTableProps> = (props) => {
   }
 
   return <FusionTableHandler
+    isFormEnabled={isFormEnabled}
+    setIsFormEnabled={setIsFormEnabled}
     currentMon={currentMon}
     filters={filters}
     pokeData={pokeData}
@@ -54,12 +59,15 @@ const FusionTable: React.FC<FusionTableProps> = (props) => {
 
 
 interface FusionTableHandlerProps {
+  isFormEnabled: boolean;
+  setIsFormEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   currentMon: string;
   filters: FusionFilters;
   pokeData: Map<string, PokemonDataEntry>;
   fullyEvolvedList: Set<string>;
 }
 const FusionTableHandler: React.FC<FusionTableHandlerProps> = (props) => {
+  const { isFormEnabled, setIsFormEnabled } = props;
   const { currentMon, filters, pokeData, fullyEvolvedList } = props;
   const [ fusionData, setFusionData ] = useState<FusionPair[]>([]);
   const [ fusionDataFiltered, setFusionDataFiltered ] = useState<PokemonDataEntry[]>([]);
@@ -167,19 +175,31 @@ const FusionTableHandler: React.FC<FusionTableHandlerProps> = (props) => {
   // Render
   switch (status) {
     case LoadingStatus.Fetching:
+      if (isFormEnabled) {
+        setIsFormEnabled(false);
+      }
       if (fusionData.length >= NUMBER_OF_POKEMON) {
         setStatus(LoadingStatus.Processing);
       }
       return <FusionTableLoading status={status} count={fusionData.length} />;
 
     case LoadingStatus.Processing:
+      if (isFormEnabled) {
+        setIsFormEnabled(false);
+      }
       return <FusionTableLoading status={status} />;
 
     case LoadingStatus.Done:
+      if (!isFormEnabled) {
+        setIsFormEnabled(true);
+      }
       return <FusionTableRender fusionData={fusionDataFiltered} />;
 
     case LoadingStatus.None:
     default:
+      if (!isFormEnabled) {
+        setIsFormEnabled(true);
+      }
       return null;
   }
 }
@@ -254,8 +274,6 @@ const FusionTableRender: React.FC<FusionTableRenderProps> = (props) => {
   fusionData.forEach(f => {
     if (f) {
       tableRows.push(<FusionTableRow key={f.id} data={f} />);
-    } else {
-      console.log(f);
     }
   });
 

@@ -1,19 +1,69 @@
 #primary-input-form {
   margin: 0 auto 2rem;
-  padding: 1.5rem 0 1.8rem;
+  padding: 1.8rem 0 2.1rem;
   width: 70%;
 
   font-size: large;
   text-align: center;
 
   background-color: #333;
-  border: solid #ccc 1px;
+  border: solid #ccc 3px;
   border-radius: 1rem;
+}
+
+#input-container {
+  box-sizing: border-box;
+  display: inline-block;
+  position: relative;
 }
 
 #primary-fusion-input {
   margin-right: 0.3rem;
   width: 8rem;
+  padding: 0.1rem;
+}
+
+#primary-fusion-input::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+#autocomplete-container {
+  position: absolute;
+  top: 1.5rem;
+  left: -1px;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  z-index: 1;
+}
+
+.autocomplete-none-found {
+  margin-left: 1rem;
+  margin-top: 3px;
+  font-size: small;
+  font-style: italic;
+}
+
+.autocomplete-with-results {
+  max-height: 8rem;
+  width: calc(8.3rem + 2px);
+
+  text-align: left;
+
+  background-color: #333;
+  border: solid #ccc 1px;
+  border-top: none;
+  border-radius: 0 0 2px 2px;
+}
+
+.autocomplete-entry {
+  padding-left: 0.3rem;
+  text-transform: capitalize;
+  font-size: small;
+}
+
+.autocomplete-entry:hover, #active-autocomplete {
+  background-color: #000;
 }
 
 #all-filters-container {
@@ -78,5 +128,12 @@ input[type="checkbox"], input[type="radio"] {
 
 fieldset {
   all: unset;
+}
+
+fieldset#radio-fieldset {
   margin-top: 0.5rem;
+}
+
+h3 {
+  font-weight: normal;
 }

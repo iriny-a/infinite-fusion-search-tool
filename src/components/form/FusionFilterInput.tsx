@@ -49,8 +49,6 @@ const FusionFilterInput: React.FC<FusionFilterInputProps> = (props) => {
     });
   }
 
-  console.log(filters);
-
   return (
     <div>
       <h3 className="center">Search Filters</h3>
@@ -77,7 +75,7 @@ const FusionFilterInput: React.FC<FusionFilterInputProps> = (props) => {
               <label htmlFor="checkbox-fully-evolved">Fully evolved only</label>
             </div>
 
-            <fieldset>
+            <fieldset id="radio-fieldset">
               <div>
                 <input
                   type="radio"
