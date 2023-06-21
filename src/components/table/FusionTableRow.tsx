@@ -83,18 +83,17 @@ const FusionTableRow: React.FC<FusionTableRowProps> = (props) => {
                 />
               </td>
             </tr>
-            <tr>
-              <td>
-                {
-                  data.types.secondType &&
-                  <img
-                    className="type-icon"
-                    src={getTypeIcon(data.types.secondType)}
-                    alt={`${data.types.secondType} type icon`}
-                  />
-                }
-              </td>
-            </tr>
+            { data.types.secondType &&
+              <tr>
+                <td>
+                    <img
+                      className="type-icon"
+                      src={getTypeIcon(data.types.secondType)}
+                      alt={`${data.types.secondType} type icon`}
+                    />
+                </td>
+              </tr>
+            }
           </tbody>
         </table>
       </td>
