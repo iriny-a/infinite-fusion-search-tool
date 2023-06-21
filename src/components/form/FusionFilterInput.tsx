@@ -1,7 +1,6 @@
 import React, { ChangeEvent } from "react";
 
 import { FusionFilters, TYPE_NAMES } from "../../data/data";
-import capitalize from "../shared/capitalize";
 
 interface FusionFilterInputProps {
   filters: FusionFilters;
@@ -24,6 +23,19 @@ const FusionFilterInput: React.FC<FusionFilterInputProps> = (props) => {
     });
   }
 
+  const handleUseInputAsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const id = e.currentTarget.id;
+    let newUseAs = id.slice(id.length - 4) as "head" | "body" | "both";
+    if (newUseAs !== "head" && newUseAs !== "body") {
+      newUseAs = "both";
+    }
+
+    setFilters({
+      ...filters,
+      useInputAs: newUseAs,
+    })
+  }
+
   const handleTypeFilterChange = (e: React.ChangeEvent<HTMLInputElement>, t: string) => {
     let typeMap = filters.typeOverride;
     if (!typeMap.get(t)) {
@@ -37,41 +49,106 @@ const FusionFilterInput: React.FC<FusionFilterInputProps> = (props) => {
     });
   }
 
+  console.log(filters);
+
   return (
-    <form>
-      <div>
-        <input type="checkbox"
-          name="customArt"
-          onChange={handleCustomArtCheck} 
-        />
-        <label htmlFor="customArt">Only include custom sprites</label>
-      </div>
-
-      <div>
-        <input type="checkbox"
-          name="fullyEvolved"
-          onChange={handleFullyEvolvedCheck} 
-        />
-        <label htmlFor="customArt">Only include fully evolved</label>
-      </div>
-
-      <label>Include only selected types:</label>
-      <div id="type-filter-container">
-        {
-          TYPE_NAMES.map(t => (
-            <div key={`type-${t}`}>
-              <input type="checkbox"
-                name={t}
-                onChange={e => handleTypeFilterChange(e, t)}
+    <div>
+      <h3 className="center">Search Filters</h3>
+      <form>
+        <div id="all-filters-container">
+          <div id="toggleable-filters-container">
+            <div>
+              <input
+                type="checkbox"
+                id="checkbox-custom-sprites"
+                onChange={handleCustomArtCheck}
+                checked={filters.customArtOnly}
                 />
-              <label htmlFor={t}>{capitalize(t)}</label>
+              <label htmlFor="checkbox-custom-sprites">Custom sprites only</label>
             </div>
-          ))
-        }
-      </div>
-    </form>
 
-    
+            <div>
+              <input
+                type="checkbox"
+                id="checkbox-fully-evolved"
+                onChange={handleFullyEvolvedCheck}
+                checked={filters.fullyEvolvedOnly}
+                />
+              <label htmlFor="checkbox-fully-evolved">Fully evolved only</label>
+            </div>
+
+            <fieldset>
+              <div>
+                <input
+                  type="radio"
+                  id="input-as-head"
+                  name="use-input-as"
+                  onChange={handleUseInputAsChange}
+                  defaultChecked={filters.useInputAs === "head"}
+                />
+                <label
+                  htmlFor="input-as-head"
+                >
+                  Input is head
+                </label>
+              </div>
+
+              <div>
+                <input
+                  type="radio"
+                  id="input-as-body"
+                  name="use-input-as"
+                  onChange={handleUseInputAsChange}
+                  defaultChecked={filters.useInputAs === "body"}
+                />
+                <label
+                  htmlFor="input-as-body"
+                >
+                  Input is body
+                </label>
+              </div>
+
+              <div>
+                <input
+                  type="radio"
+                  id="input-as-both"
+                  name="use-input-as"
+                  onChange={handleUseInputAsChange}
+                  defaultChecked={filters.useInputAs === "both"}
+                />
+                <label
+                  htmlFor="input-as-both"
+                >
+                  Input is head or body
+                </label>
+              </div>
+            </fieldset>
+          </div>
+
+          <div id="type-filter-container">
+            <div id="type-filter-checkboxes">
+              {
+                TYPE_NAMES.map(t => (
+                  <div
+                    key={`type-${t}`}
+                    className={`checkbox-type-container ${filters.typeOverride.get(t) ? "" : "faded"}`}
+                  >
+                    <input type="checkbox"
+                      id={`checkbox-type-${t}`}
+                      onChange={e => handleTypeFilterChange(e, t)}
+                      checked={filters.typeOverride.get(t)}
+                      />
+                    <label htmlFor={`checkbox-type-${t}`} >
+                      <img src={`./icons/${t}.png`} className="checkbox-type-img" />
+                    </label>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
   );
 }
 

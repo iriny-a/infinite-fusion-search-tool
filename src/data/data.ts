@@ -60,8 +60,11 @@ export interface PokeAPIRes {
 
 export interface FusionFilters {
   customArtOnly: boolean;
-  typeOverride: Map<string, boolean>;
   fullyEvolvedOnly: boolean;
+
+  useInputAs: "head" | "body" | "both";
+
+  typeOverride: Map<string, boolean>;
 }
 
 export interface FusionPair {

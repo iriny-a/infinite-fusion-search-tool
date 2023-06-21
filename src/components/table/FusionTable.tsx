@@ -127,16 +127,22 @@ const FusionTableHandler: React.FC<FusionTableHandlerProps> = (props) => {
       return !filters.fullyEvolvedOnly || dt.headBody.fullyEvolved;
     });
     
-    // Custom art filter
+    // Head/body filter
     let filteredData: PokemonDataEntry[] = [];
     filteredPairs.forEach(p => {
-      if (!filters.customArtOnly || p.headBody.artUrl?.isCustom) {
+      if (filters.useInputAs === "both" || filters.useInputAs === "head") {
         filteredData.push(p.headBody);
       }
-      if (p.baseMon !== p.inputMon && (!filters.customArtOnly || p.bodyHead.artUrl?.isCustom)) {
+      if (p.baseMon !== p.inputMon
+        && (filters.useInputAs === "both" || filters.useInputAs === "body")) {
         filteredData.push(p.bodyHead);
       }
     });
+
+    // Custom sprite filter
+    filteredData = filteredData.filter(dt => (
+      !filters.customArtOnly || dt.artUrl?.isCustom
+    ));
 
     // Typing filter
     const typingFilterOverride = (
@@ -180,7 +186,7 @@ const FusionTableHandler: React.FC<FusionTableHandlerProps> = (props) => {
 
 
 const FusionTableNone: React.FC = () => {
-  return <div id="no-pokemon-msg">Enter a primary Pokémon to view results.</div>;
+  return <div id="no-pokemon-msg">Enter a Pokémon of interest to load results.</div>;
 }
 
 interface FusionTableLoadingProps {
@@ -193,6 +199,7 @@ const FusionTableLoading: React.FC<FusionTableLoadingProps> = (props) => {
   if (status === LoadingStatus.Processing || (count && count + 1 === NUMBER_OF_POKEMON)) {
     return (
       <div className="loading">
+        <FusionTableLoadingBall />
         Sorting and processing fusions...
         <FusionTableProgressBar count={NUMBER_OF_POKEMON} />
       </div>
@@ -203,6 +210,7 @@ const FusionTableLoading: React.FC<FusionTableLoadingProps> = (props) => {
   if (status === LoadingStatus.Fetching) {
     return (
       <div className="loading">
+        <FusionTableLoadingBall />
         Loading fusions... ({count ? count + 1 : 0}/{NUMBER_OF_POKEMON})
         <FusionTableProgressBar count={count ? count + 1 : 0 } />
       </div>
@@ -210,6 +218,15 @@ const FusionTableLoading: React.FC<FusionTableLoadingProps> = (props) => {
   }
   
   return null;
+}
+
+
+const FusionTableLoadingBall: React.FC = () => {
+  return (
+    <div id="loading-ball">
+      <img src="./icons/pokeball_shake.gif" />
+    </div>
+  );
 }
 
 
