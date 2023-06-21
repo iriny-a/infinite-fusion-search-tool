@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   POKE_NAME_TO_ID,
-  TYPE_NAMES_TO_COLORS,
 } from "../../data/data";
 import capitalize from "../shared/capitalize";
 

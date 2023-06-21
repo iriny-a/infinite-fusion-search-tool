@@ -41,7 +41,14 @@ const FusionTableRow: React.FC<FusionTableRowProps> = (props) => {
         width: "200px",
         border: data.artUrl?.isCustom ? "solid green 3px" : "inherit"}}
       >
-        {data.artUrl ? <img src={data.artUrl.url} style={{width: "100%"}} /> : null}
+        {
+          data.artUrl &&
+          <img
+            src={data.artUrl.url}
+            style={{width: "100%"}}
+            alt={`sprite of ${data.name} fusion`}
+          />
+        }
       </td>
 
       <td>
@@ -69,12 +76,23 @@ const FusionTableRow: React.FC<FusionTableRowProps> = (props) => {
           <tbody>
             <tr>
               <td>
-                <img className="type-icon" src={getTypeIcon(data.types.firstType)} />
+                <img
+                  className="type-icon"
+                  src={getTypeIcon(data.types.firstType)}
+                  alt={`${data.types.firstType} type icon`}
+                />
               </td>
             </tr>
             <tr>
               <td>
-                {data.types.secondType ? <img className="type-icon" src={getTypeIcon(data.types.secondType)} />: null}
+                {
+                  data.types.secondType &&
+                  <img
+                    className="type-icon"
+                    src={getTypeIcon(data.types.secondType)}
+                    alt={`${data.types.secondType} type icon`}
+                  />
+                }
               </td>
             </tr>
           </tbody>

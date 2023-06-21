@@ -1,4 +1,4 @@
-import React, { ChangeEvent } from "react";
+import React from "react";
 
 import { FusionFilters, TYPE_NAMES } from "../../data/data";
 
@@ -137,7 +137,11 @@ const FusionFilterInput: React.FC<FusionFilterInputProps> = (props) => {
                       checked={filters.typeOverride.get(t)}
                       />
                     <label htmlFor={`checkbox-type-${t}`} >
-                      <img src={`./icons/${t}.png`} className="checkbox-type-img" />
+                      <img
+                        src={`./icons/${t}.png`}
+                        className="checkbox-type-img"
+                        alt={`${t} type icon`}
+                      />
                     </label>
                   </div>
                 ))
