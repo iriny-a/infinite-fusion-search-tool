@@ -1,6 +1,6 @@
 import React from "react";
 
-import { PokemonDataEntry, TYPE_NAMES } from "../../data/data";
+import { PokemonDataEntry, POKEMON_TYPES } from "../../data/data";
 import capitalize from "../shared/capitalize";
 
 
@@ -147,7 +147,7 @@ const FusionTableRow: React.FC<FusionTableRowProps> = (props) => {
 }
 
 const getTypeIcon = (type: string): string => {
-  if (TYPE_NAMES.includes(type)) {
+  if (POKEMON_TYPES.includes(type)) {
     return `./icons/${type}.png`;
   }
   return `./icons/unknown.png`;

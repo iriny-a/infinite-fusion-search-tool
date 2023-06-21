@@ -8,8 +8,8 @@ export interface PokemonStats {
 }
 
 export interface PokemonTypes {
-  firstType: string;
-  secondType: string | null;
+  firstType: PokeType;
+  secondType: PokeType | null;
 }
 
 export interface PokemonAbilities {
@@ -504,7 +504,29 @@ export const POKE_NAME_TO_ID = new Map<string, string>([
   ["stunfisk", "420"],
 ]);
 
-export const TYPE_NAMES = [
+export type PokeType = (
+  "normal" |
+  "fire" |
+  "water" |
+  "grass" |
+  "electric" |
+  "ice" |
+  "fighting" |
+  "poison" |
+  "ground" |
+  "flying" |
+  "psychic" |
+  "bug" |
+  "rock" |
+  "ghost" |
+  "dark" |
+  "dragon" |
+  "steel" |
+  "fairy" |
+  "unknown"
+);
+
+export const POKEMON_TYPES = [
   "normal",
   "fire",
   "water",
@@ -525,7 +547,7 @@ export const TYPE_NAMES = [
   "fairy",
 ]
 
-export const TYPE_NAMES_TO_COLORS = new Map<string, string>([
+export const TYPE_NAMES_TO_COLORS = new Map<PokeType, string>([
   ["normal", "#A8A77A"],
   ["fire", "#EE8130"],
   ["water", "#6390F0"],
@@ -607,7 +629,7 @@ const maybeApplyTypingReversal = (name: string): boolean => {
 // For either balance or thematic reasons, some mons in PIF have exceptions to
 // the usual fusion rules when it comes to contributing their typing. Any such
 // overrides are specified here, to be handled during fusion computation.
-const typingOverrideMap = new Map<string, string>([
+const typingOverrideMap = new Map<string, PokeType>([
   ["bulbasaur", "grass"],
   ["ivysaur", "grass"],
   ["venusaur", "grass"],
@@ -626,7 +648,7 @@ const typingOverrideMap = new Map<string, string>([
   ["moltres", "fire"],
   ["dragonite", "dragon"],
 ]);
-export const maybeGetTypingOverride = (dt: PokemonDataEntry): string | null => {
+export const maybeGetTypingOverride = (dt: PokemonDataEntry): PokeType | null => {
   // Note that the reverse check for this particular override is not necessary,
   // as there are no Flying/Normal type Pokemon.
   if (dt.types.firstType === "normal" && dt.types.secondType === "flying") {
@@ -660,15 +682,15 @@ const parsePokeAPI = (rawRes: PokeAPIRes): PokemonDataEntry => {
 
   // Types and corresponding overrides
   let types: PokemonTypes = {
-    firstType: rawRes.types[0].type.name as string,
-    secondType: ""
+    firstType: rawRes.types[0].type.name as PokeType,
+    secondType: null
   }
   if (rawRes.types.length > 1) {
-    types.secondType = rawRes.types[1].type.name as string;
+    types.secondType = rawRes.types[1].type.name as PokeType;
   }
   if (maybeApplyTypingReversal(name)) {
     types = {
-      firstType: types.secondType as string,
+      firstType: types.secondType as PokeType,
       secondType: types.firstType,
     }
   }

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { FusionFilters, TYPE_NAMES } from "../../data/data";
+import { FusionFilters, POKEMON_TYPES } from "../../data/data";
 
 interface FusionFilterInputProps {
   filters: FusionFilters;
@@ -126,7 +126,7 @@ const FusionFilterInput: React.FC<FusionFilterInputProps> = (props) => {
           <div id="type-filter-container">
             <div id="type-filter-checkboxes">
               {
-                TYPE_NAMES.map(t => (
+                POKEMON_TYPES.map(t => (
                   <div
                     key={`type-${t}`}
                     className={`checkbox-type-container ${filters.typeOverride.get(t) ? "" : "faded"}`}
