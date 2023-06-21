@@ -1,6 +1,6 @@
 import React from "react";
 
-import { PokemonDataEntry, POKEMON_TYPES } from "../../data/data";
+import { PokemonDataEntry, POKEMON_TYPES, cosmetifyName } from "../../data/data";
 import capitalize from "../shared/capitalize";
 
 
@@ -16,7 +16,7 @@ const FusionTableRow: React.FC<FusionTableRowProps> = (props) => {
       return "";
     }
 
-    return name.split("/").map(n => capitalize(n)).join("/");
+    return name.split("/").map(n => capitalize(cosmetifyName(n))).join("/");
   }
   const cleanAbility = (ability: string | null): string => {
     if (!ability) {

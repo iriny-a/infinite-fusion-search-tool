@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import {
-  POKE_NAME_TO_ID,
+  POKE_NAME_TO_ID, cosmetifyName, unCosmetifyName,
 } from "../../data/data";
 import capitalize from "../shared/capitalize";
 
@@ -53,7 +53,7 @@ const FusionInput: React.FC<FusionInputProps> = (props) => {
 
     setAutocompleteList(POKE_NAMES.filter(n => (
       n.indexOf(input.toLowerCase()) > -1
-    )));
+    )).map(n => cosmetifyName(n)));
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -120,6 +120,7 @@ const FusionInput: React.FC<FusionInputProps> = (props) => {
     setAutocompleteList(false);
     setActiveAutocomplete(0);
     setCurrentInput(name);
+    name = unCosmetifyName(name);
     triggerSubmitWithName(name);
   }
 
@@ -191,6 +192,7 @@ const Autocomplete: React.FC<AutocompleteProps> = (props) => {
             id={(activeAutocomplete === i + 1) ? "active-autocomplete" : undefined}
             className="autocomplete-entry"
             onMouseDown={handleAutocompleteClick}
+            key={`autocomplete-dropdown-${ac}`}
           >
             {ac}
           </div>

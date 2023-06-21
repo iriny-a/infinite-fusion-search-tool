@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import FusionInput from "./FusionInput";
 
-import { FusionFilters, POKE_NAME_TO_ID, PokemonDataEntry, TYPE_NAMES_TO_COLORS } from "../../data/data";
+import { FusionFilters, POKE_NAME_TO_ID, PokemonDataEntry, TYPE_NAMES_TO_COLORS, unCosmetifyName } from "../../data/data";
 import FusionFilterInput from "./FusionFilterInput";
 
 import "./FusionForm.css";
@@ -48,7 +48,8 @@ const FusionForm: React.FC<FusionFormProps> = (props) => {
   }
 
   const getStyleForInput = (): React.CSSProperties => {
-    const input = currentInput.toLowerCase();
+    const input = unCosmetifyName(currentInput.toLowerCase());
+    console.log(input, currentMon);
     if (!currentMon) {
       return {};
     }

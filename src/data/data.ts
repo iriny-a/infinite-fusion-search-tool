@@ -1,5 +1,3 @@
-import { writeFile } from "fs";
-
 export interface PokemonStats {
   attack: number;
   defense: number;
@@ -506,6 +504,33 @@ export const POKE_NAME_TO_ID = new Map<string, string>([
   ["stunfisk", "420"],
 ]);
 
+// Some of these internal names are not very user-friendly (ex. "mr-mime",
+// "aegislash-shield"), so we can override them with some more cosmetic
+// versions when they're user-facing. We'll need the ability to reverse these
+// cosmetic versions as well, of course.
+//
+const pokeNameToCosmeticName = new Map<string, string>([
+  ["nidoran-f", "nidoran (f)"],
+  ["nidoran-m", "nidoran (m)"],
+  ["mr-mime", "mr. mime"],
+  ["mime-jr", "mime jr."],
+  ["aegislash-shield", "aegislash"],
+  ["giratina-altered", "giratina"],
+  ["mimikyu-disguised", "mimikyu"],
+  ["deoxys-normal", "deoxys"],
+]);
+const cosmeticNameToPokeName = new Map<string, string>();
+pokeNameToCosmeticName.forEach((v, k) => cosmeticNameToPokeName.set(v, k));
+// For safety, both of these conversion functions are idempotent.
+export const cosmetifyName = (name: string): string => {
+  name = name.toLowerCase();
+  return pokeNameToCosmeticName.get(name) || name
+};
+export const unCosmetifyName = (name: string): string => {
+  name = name.toLowerCase();
+  return cosmeticNameToPokeName.get(name) || name
+};
+
 export type PokeType = (
   "normal" |
   "fire" |
@@ -585,7 +610,7 @@ export const getAllPokemonData = async (): Promise<Map<string, PokemonDataEntry>
 
   const pokeDataMap = new Map<string, PokemonDataEntry>();
   dataUnparsed.forEach((dt: [string, PokeAPIRes]) => {
-    pokeDataMap.set(dt[0], parsePokeAPI(dt[1]));
+    pokeDataMap.set(dt[0], parsePokeAPI(dt));
   })
   return pokeDataMap;
 }
@@ -863,7 +888,6 @@ const statOverrideMap = new Map<string, PokemonStats>([
     hp: 60,
   }],
 ]);
-let i = 0;
 const maybeGetStatOverride = (name: string): PokemonStats | null => {
   const statOverride = statOverrideMap.get(name);
   return statOverride ? statOverride : null;
@@ -922,9 +946,9 @@ export const maybeGetTypingOverride = (dt: PokemonDataEntry): PokeType | null =>
   return typingOverride ? typingOverride : null;
 }
 
-const parsePokeAPI = (rawRes: PokeAPIRes): PokemonDataEntry => {
-  const name = rawRes.species.name as string;
-
+const parsePokeAPI = (res: [string, PokeAPIRes]): PokemonDataEntry => {
+  const name = res[0];
+  const rawRes = res[1];
   const id = POKE_NAME_TO_ID.get(name) as string;
 
   // Stats and corresponding overrides

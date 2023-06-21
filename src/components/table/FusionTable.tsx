@@ -170,34 +170,44 @@ const FusionTableHandler: React.FC<FusionTableHandlerProps> = (props) => {
     setStatus(LoadingStatus.Done);
   }, [fusionData, filters, status]);
 
+  // Form control.
+  useEffect(() => {
+    switch(status) {
+      case LoadingStatus.Fetching:
+      case LoadingStatus.Processing:
+        if (isFormEnabled) {
+          setIsFormEnabled(false);
+        }
+        break;
+      
+      case LoadingStatus.None:
+      case LoadingStatus.Done:
+      default:
+        if (!isFormEnabled) {
+          setIsFormEnabled(true);
+        }
+        break;
+    }
+  // isFormEnabled and setIsFormEnabled are not necessary dependencies here
+  // eslint-disable-next-line
+  }, [status])
+
   // Render
   switch (status) {
     case LoadingStatus.Fetching:
-      if (isFormEnabled) {
-        setIsFormEnabled(false);
-      }
       if (fusionData.length >= NUMBER_OF_POKEMON) {
         setStatus(LoadingStatus.Processing);
       }
       return <FusionTableLoading status={status} count={fusionData.length} />;
 
     case LoadingStatus.Processing:
-      if (isFormEnabled) {
-        setIsFormEnabled(false);
-      }
       return <FusionTableLoading status={status} />;
 
     case LoadingStatus.Done:
-      if (!isFormEnabled) {
-        setIsFormEnabled(true);
-      }
       return <FusionTableRender fusionData={fusionDataFiltered} />;
 
     case LoadingStatus.None:
     default:
-      if (!isFormEnabled) {
-        setIsFormEnabled(true);
-      }
       return null;
   }
 }
