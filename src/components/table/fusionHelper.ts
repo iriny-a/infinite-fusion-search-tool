@@ -1,4 +1,4 @@
-import { PokemonAbilities, PokemonDataEntry, PokemonTypes } from "../../data/data";
+import { PokemonAbilities, PokemonDataEntry, PokemonTypes, maybeGetTypingOverride } from "../../data/data";
 import capitalize from "../shared/capitalize";
 
 const getFusionData = (
@@ -6,7 +6,7 @@ const getFusionData = (
   bodyData: PokemonDataEntry,
   inputMon: "head" | "body",
   fullyEvolvedList: Set<string>
-  ): PokemonDataEntry => {
+): PokemonDataEntry => {
   const fusionData: PokemonDataEntry = {
     name: `${capitalize(headData.name)}/${capitalize(bodyData.name)}`,
     id: `${headData.id}.${bodyData.id}`,
@@ -21,7 +21,7 @@ const getFusionData = (
       "special-defense": weightStat(headData.stats["special-defense"], bodyData.stats["special-defense"]),
       hp: weightStat(headData.stats.hp, bodyData.stats.hp),
     },
-    types: getFusionTyping(headData.types, bodyData.types),
+    types: getFusionTyping(headData, bodyData),
     abilities: getFusionAbilities(headData.abilities, bodyData.abilities),
     // We want fully evolved status to be a useful table-wide filter, so we need
     // to know which mon to consider the fully evolved status of. This is a bit
@@ -35,23 +35,43 @@ const getFusionData = (
 }
 
 const getFusionTyping = (
-  headTypes: PokemonTypes,
-  bodyTypes: PokemonTypes
-  ): PokemonTypes => {
-  // Most fusions will take head's primary type and body's secondary type
-  const fusionTyping: PokemonTypes = {
-    firstType: headTypes.firstType,
-    secondType: bodyTypes.secondType
+  headData: PokemonDataEntry,
+  bodyData: PokemonDataEntry
+): PokemonTypes => {
+  // Heads will usually contribute their first type, unless overridden.
+  let headContribution = headData.types.firstType;
+  const headTypeOverride = maybeGetTypingOverride(headData);
+  if (headTypeOverride) {
+    headContribution = headTypeOverride;
   }
-  // TODO: overrides, exceptions, and edge cases
 
+  // Bodies usually contribute their second type if they have one.
+  let bodyContribution = bodyData.types.secondType;
+  // This can be overridden as well.
+  const bodyTypeOverride = maybeGetTypingOverride(bodyData);
+  if (bodyTypeOverride) {
+    bodyContribution = bodyTypeOverride;
+  // Otherwise, use the first type if the second type doesn't apply.
+  } else if (!bodyContribution || bodyContribution === headContribution) {
+    bodyContribution = bodyData.types.firstType;
+  }
+
+  // Final cleanup
+  if (headContribution === bodyContribution) {
+    bodyContribution = null;
+  }
+
+  const fusionTyping: PokemonTypes = {
+    firstType: headContribution,
+    secondType: bodyContribution,
+  }
   return fusionTyping;
 }
 
 const getFusionAbilities = (
   headAbilities: PokemonAbilities,
   bodyAbilities: PokemonAbilities
-  ): PokemonAbilities => {
+): PokemonAbilities => {
  // Most fusions will take head's second ability or body's first ability
  const fusionAbilities: PokemonAbilities = {
    firstAbility: bodyAbilities.firstAbility,

@@ -567,7 +567,8 @@ export const getAllPokemonData = async (): Promise<Map<string, PokemonDataEntry>
 }
 
 // Some PIF mons are slightly different from the most recent Game Freak versions
-// of those mons. Any such differences are specified here and handled
+// of those mons. Any such differences are specified here and integrated when
+// the cached API data is parsed.
 const statOverrideMap = new Map<string, PokemonStats>([
   ["aegislash", {
     attack: 50,
@@ -578,10 +579,62 @@ const statOverrideMap = new Map<string, PokemonStats>([
     hp: 60,
   }]
 ]);
-
 const maybeGetStatOverride = (name: string): PokemonStats | null => {
   const statOverride = statOverrideMap.get(name);
   return statOverride ? statOverride : null;
+}
+
+// For either balance or thematic reasons, some mons in PIF have had their
+// typings reversed. Any such differences are specified here and integrated
+// when the cached API data is parsed.
+const typingReversalSet = new Set<string>([
+  "magnemite",
+  "magneton",
+  "dewgong",
+  "omanyte",
+  "omastar",
+  "scizor",
+  "magnezone",
+  "empoleon",
+  "spiritomb",
+  "ferrothorn",
+  "celebi",
+]);
+const maybeApplyTypingReversal = (name: string): boolean => {
+  return typingReversalSet.has(name);
+};
+
+// For either balance or thematic reasons, some mons in PIF have exceptions to
+// the usual fusion rules when it comes to contributing their typing. Any such
+// overrides are specified here, to be handled during fusion computation.
+const typingOverrideMap = new Map<string, string>([
+  ["bulbasaur", "grass"],
+  ["ivysaur", "grass"],
+  ["venusaur", "grass"],
+  ["charizard", "fire"],
+  ["geodude", "rock"],
+  ["graveler", "rock"],
+  ["golem", "rock"],
+  ["gastly", "ghost"],
+  ["haunter", "ghost"],
+  ["gengar", "ghost"],
+  ["onix", "rock"],
+  ["scyther", "bug"],
+  ["gyarados", "water"],
+  ["articuno", "ice"],
+  ["zapdos", "electric"],
+  ["moltres", "fire"],
+  ["dragonite", "dragon"],
+]);
+export const maybeGetTypingOverride = (dt: PokemonDataEntry): string | null => {
+  // Note that the reverse check for this particular override is not necessary,
+  // as there are no Flying/Normal type Pokemon.
+  if (dt.types.firstType === "normal" && dt.types.secondType === "flying") {
+    return "flying";
+  }
+
+  const typingOverride = typingOverrideMap.get(dt.name);
+  return typingOverride ? typingOverride : null;
 }
 
 const parsePokeAPI = (rawRes: PokeAPIRes): PokemonDataEntry => {
@@ -589,6 +642,7 @@ const parsePokeAPI = (rawRes: PokeAPIRes): PokemonDataEntry => {
 
   const id = POKE_NAME_TO_ID.get(name) as string;
 
+  // Stats and corresponding overrides
   let stats: PokemonStats = {
     attack: 0,
     defense: 0,
@@ -604,14 +658,22 @@ const parsePokeAPI = (rawRes: PokeAPIRes): PokemonDataEntry => {
     rawRes.stats.forEach(st => stats[st.stat.name] = st.base_stat);
   }
 
-  const types: PokemonTypes = {
+  // Types and corresponding overrides
+  let types: PokemonTypes = {
     firstType: rawRes.types[0].type.name as string,
     secondType: ""
   }
   if (rawRes.types.length > 1) {
     types.secondType = rawRes.types[1].type.name as string;
   }
+  if (maybeApplyTypingReversal(name)) {
+    types = {
+      firstType: types.secondType as string,
+      secondType: types.firstType,
+    }
+  }
 
+  // Abilities and corresponding overrides
   const abilities: PokemonAbilities = {
     firstAbility: "",
     secondAbility: null,
