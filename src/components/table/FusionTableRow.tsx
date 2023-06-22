@@ -1,6 +1,6 @@
 import React from "react";
 
-import { PokemonDataEntry, POKEMON_TYPES, cosmetifyName } from "../../data/data";
+import { PokemonDataEntry, POKEMON_TYPES, cosmetifyName, FusionSortBy } from "../../data/data";
 import capitalize from "../shared/capitalize";
 
 
@@ -69,6 +69,10 @@ const FusionTableRow: React.FC<FusionTableRowProps> = (props) => {
       </td>
       <td>
         {data.stats.hp}
+      </td>
+
+      <td>
+        {data.statTotal}
       </td>
 
       <td className="type-column">

@@ -30,8 +30,12 @@ export interface PokemonDataEntry {
   stats: PokemonStats;
   types: PokemonTypes;
   abilities: PokemonAbilities;
+  statTotal?: number;
   artUrl?: FusionArtURL;
   fullyEvolved?: boolean;
+  incomingId?: string;
+  incomingName?: string;
+  incomingFullyEvolved?: string;
 }
 
 export interface PokeAPIRes {
@@ -61,10 +65,24 @@ export interface PokeAPIRes {
 export interface FusionFilters {
   customArtOnly: boolean;
   fullyEvolvedOnly: boolean;
-
   useInputAs: "head" | "body" | "both";
 
   typeOverride: Map<string, boolean>;
+}
+
+export interface FusionSortBy {
+  field: (
+    "id" |
+    "name" |
+    "atk" |
+    "def" |
+    "spe" |
+    "spa" |
+    "spd" |
+    "hp" |
+    "total"
+  );
+  direction: "ascending" | "descending";
 }
 
 export interface FusionPair {
@@ -946,6 +964,17 @@ export const maybeGetTypingOverride = (dt: PokemonDataEntry): PokeType | null =>
   return typingOverride ? typingOverride : null;
 }
 
+export const getStatTotal = (s: PokemonStats): number => {
+  return (
+    s.attack
+    + s.defense
+    + s.speed
+    + s["special-attack"]
+    + s["special-defense"]
+    + s.hp
+  );
+}
+
 const parsePokeAPI = (res: [string, PokeAPIRes]): PokemonDataEntry => {
   const name = res[0];
   const rawRes = res[1];
@@ -997,13 +1026,13 @@ const parsePokeAPI = (res: [string, PokeAPIRes]): PokemonDataEntry => {
     } else {
       abilities.firstAbility = abilityName;
     }
-  })
+  });
 
   return {
     name,
     id,
     stats,
     types,
-    abilities
+    abilities,
   };
 }

@@ -15,6 +15,7 @@ const PIF_URL = "https://www.pokecommunity.com/showthread.php?t=347883";
 const PIF_DISCORD_ART_URL = "https://discord.com/invite/2yynWRvBrB";
 const AEGIDE_URL = "https://github.com/Aegide";
 const JAPEAL_URL = "https://japeal.com/pkm/";
+const MY_GITHUB_URL = "https://github.com/iriny-a";
 
 const getDefaultFilters = (): FusionFilters => {
   return {
@@ -28,10 +29,12 @@ const getDefaultFilters = (): FusionFilters => {
 
 const App: React.FC = () => {
   const [ currentMon, setCurrentMon ] = useState<string | undefined>(undefined);
-  const [ filters, setFilters ] = useState<FusionFilters>(getDefaultFilters());
   const [ pokeData, setPokeData ] = useState<Map<string, PokemonDataEntry> | null>(null);
   const [ fullyEvolvedList, setFullyEvolvedList ] = useState<Set<string> | null>(null);
   const [ isFormEnabled, setIsFormEnabled ] = useState<boolean>(true);
+
+  const [ filters, setFilters ] = useState<FusionFilters>(getDefaultFilters());
+  
 
   useEffect(() => {
     (async () => {
@@ -109,8 +112,11 @@ const Info: React.FC = () => {
         to <a href={JAPEAL_URL}>Japeal</a> for all autogen sprites.
       </p>
       <p>
-        Please contact me on either GitHub or Discord (@irinya) with any
-        questions, issues, requests, or bug reports.
+        Please reach out to me on
+        either <a href={MY_GITHUB_URL}>GitHub</a> or Discord (<b>@irinya</b>)
+        with any questions, issues, requests, or bug reports related to this
+        tool. I am not personally affiliated with The Pokémon Company, Nintendo,
+        Game Freak, Creatures Inc., or the Infinite Fusion project.
       </p>
     </div>
   )

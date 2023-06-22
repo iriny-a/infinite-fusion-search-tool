@@ -1,10 +1,10 @@
-import { PokemonAbilities, PokemonDataEntry, PokemonTypes, maybeGetTypingOverride } from "../../data/data";
+import { PokemonAbilities, PokemonDataEntry, PokemonTypes, getStatTotal, maybeGetTypingOverride } from "../../data/data";
 import capitalize from "../shared/capitalize";
 
 const getFusionData = (
   headData: PokemonDataEntry,
   bodyData: PokemonDataEntry,
-  inputMon: "head" | "body",
+  incomingMon: "head" | "body",
   fullyEvolvedList: Set<string>
 ): PokemonDataEntry => {
   const fusionData: PokemonDataEntry = {
@@ -23,13 +23,17 @@ const getFusionData = (
     },
     types: getFusionTyping(headData, bodyData),
     abilities: getFusionAbilities(headData.abilities, bodyData.abilities),
+
+    incomingId: incomingMon === "head" ? headData.id : bodyData.id,
+    incomingName: incomingMon === "head" ? headData.name : bodyData.name,
     // We want fully evolved status to be a useful table-wide filter, so we need
     // to know which mon to consider the fully evolved status of. This is a bit
     // counterintuitive since it's not how the game considers mons to be fully
     // evolved, but if we don't do this, it's impossible to filter on this
     // criteria if the input mon isn't fully evolved.
-    fullyEvolved: inputMon === "head" ? fullyEvolvedList.has(headData.name) : fullyEvolvedList.has(bodyData.name),
+    fullyEvolved: incomingMon === "head" ? fullyEvolvedList.has(headData.name) : fullyEvolvedList.has(bodyData.name),
   }
+  fusionData.statTotal = getStatTotal(fusionData.stats);
 
   return fusionData;
 }

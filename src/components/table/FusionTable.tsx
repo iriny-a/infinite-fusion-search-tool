@@ -8,7 +8,8 @@ import {
   PokemonDataEntry,
   POKE_NAME_TO_ID,
   FusionPair,
-  ArtWorkerMessage
+  ArtWorkerMessage,
+  FusionSortBy
 } from "../../data/data";
 
 import "./FusionTable.css";
@@ -114,7 +115,7 @@ const FusionTableHandler: React.FC<FusionTableHandlerProps> = (props) => {
   // eslint-disable-next-line
   }, [currentMon, fullyEvolvedList, pokeData]);
 
-  // Filter (TODO: sort)
+  // Filter
   useEffect(() => {
     // We want to let Processing through for obvious reasons, but we also want
     // to let Done through. This is because the only time this hook will trigger
@@ -123,8 +124,7 @@ const FusionTableHandler: React.FC<FusionTableHandlerProps> = (props) => {
       return;
     }
 
-    // Default sort
-    let filteredPairs = fusionData.sort((p1, p2) => p1.inputId - p2.inputId);
+    let filteredPairs = [...fusionData];
 
     // NFE filter
     filteredPairs = filteredPairs.filter(dt => {
@@ -204,7 +204,7 @@ const FusionTableHandler: React.FC<FusionTableHandlerProps> = (props) => {
       return <FusionTableLoading status={status} />;
 
     case LoadingStatus.Done:
-      return <FusionTableRender fusionData={fusionDataFiltered} />;
+      return <FusionTableSorting fusionData={fusionDataFiltered} />;
 
     case LoadingStatus.None:
     default:
@@ -271,19 +271,128 @@ const FusionTableProgressBar: React.FC<FusionTableProgressBarProps> = (props) =>
   )
 }
 
+const getDefaultSort = (): FusionSortBy => {
+  return {
+    field: "id",
+    direction: "ascending",
+  }
+}
+
+interface FusionTableSortingProps {
+  fusionData: PokemonDataEntry[];
+}
+const FusionTableSorting: React.FC<FusionTableSortingProps> = (props) => {
+  const { fusionData } = props;
+  const [ fusionDataSorted, setFusionDataSorted ] = useState<PokemonDataEntry[]>([]);
+  const [ sortBy, setSortBy ] = useState<FusionSortBy>(getDefaultSort());
+
+  useEffect(() => {
+    const sortFn = (d1: PokemonDataEntry, d2: PokemonDataEntry): number => {
+      const dMult = sortBy.direction === "ascending" ? 1 : -1;
+      let rval = 0;
+
+      switch (sortBy.field) {
+        case "id":
+          rval = parseInt(d1.incomingId as string) - parseInt(d2.incomingId as string);
+          break;
+        case "name":
+          if (d1.incomingName === undefined || d2.incomingName === undefined) {
+            rval = 0;
+            break;
+          }
+          
+          rval = d1.incomingName?.localeCompare(d2.incomingName as string);
+          break;
+        case "atk":
+          rval = d1.stats.attack - d2.stats.attack;
+          break;
+        case "def":
+          rval = d1.stats.defense - d2.stats.defense;
+          break;
+        case "spe":
+          rval = d1.stats.speed - d2.stats.speed;
+          break;
+        case "spa":
+          rval = d1.stats["special-attack"] - d2.stats["special-attack"];
+          break;
+        case "spd":
+          rval = d1.stats["special-defense"] - d2.stats["special-defense"];
+          break;
+        case "hp":
+          rval = d1.stats.hp - d2.stats.hp;
+          break;
+        case "total":
+          rval = (d1.statTotal as number) - (d2.statTotal as number);
+          break;
+      }
+
+      return dMult * rval;
+    }
+
+    // Spreading here is necessary for React to consider it a different array
+    setFusionDataSorted([...fusionData.sort(sortFn)]);
+  }, [fusionData, sortBy]);
+
+  const handleChangeSort = (incField: FusionSortBy["field"]) => {
+    // If the incoming field is different from the current one, switch to the
+    // incoming and default to ascending
+    if (sortBy.field !== incField) {
+      setSortBy({
+        field: incField,
+        direction: "ascending",
+      });
+      return;
+    }
+
+    // Otherwise, swap the direction
+    setSortBy(sb => ({
+      ...sb,
+      direction: sb.direction === "ascending" ? "descending" : "ascending",
+    }));
+  }
+
+  return (
+    <FusionTableRender
+      fusionData={fusionDataSorted}
+      sortBy={sortBy}
+      handleChangeSort={handleChangeSort}
+    />
+  );
+}
+
 
 interface FusionTableRenderProps {
   fusionData: PokemonDataEntry[];
+  sortBy: FusionSortBy;
+  handleChangeSort: (incField: FusionSortBy["field"]) => void;
 }
 const FusionTableRender: React.FC<FusionTableRenderProps> = (props) => {
-  const { fusionData } = props;
+  const { fusionData, sortBy, handleChangeSort } = props;
+  const [ tableRows, setTableRows ] = useState<JSX.Element[]>([]);
 
-  const tableRows: JSX.Element[] = [];
-  fusionData.forEach(f => {
-    if (f) {
-      tableRows.push(<FusionTableRow key={f.id} data={f} />);
-    }
-  });
+  console.log("start of fusiontablerender")
+
+  useEffect(() => {
+    const rows: JSX.Element[] = [];
+    fusionData.forEach((f, i) => {
+      if (f) {
+        rows.push(
+          <FusionTableRow
+            key={f.id}
+            data={f}
+          />
+        );
+      }
+    });
+    console.log(rows[0]);
+    setTableRows(rows);
+  }, [fusionData]);
+
+  if (!fusionData.length) {
+    return null;
+  }
+
+  console.log("render", fusionData[0].name)
 
   return (
     <div id="fusion-table-container">
@@ -291,18 +400,90 @@ const FusionTableRender: React.FC<FusionTableRenderProps> = (props) => {
       <table id="fusion-table">
         <thead id="fusion-table-head">
           <tr>
-            <th>Dex No.</th>
-            <th>Name</th>
-            <th>Art</th>
-            <th>Atk</th>
-            <th>Def</th>
-            <th>Spe</th>
-            <th>SpA</th>
-            <th>SpD</th>
-            <th>HP</th>
-            <th>Typing</th>
-            <th>Abilities</th>
-            <th>Other Abilities</th>
+            <th>
+              Dex No.
+              <ChangeSort
+                handleChangeSort={handleChangeSort}
+                fieldName="id"
+                activeSort={sortBy}
+              />
+            </th>
+            <th>
+              Name
+              <ChangeSort
+                handleChangeSort={handleChangeSort}
+                fieldName="name"
+                activeSort={sortBy}
+              />
+            </th>
+            <th>
+              Art
+            </th>
+            <th>
+              Atk
+              <ChangeSort
+                handleChangeSort={handleChangeSort}
+                fieldName="atk"
+                activeSort={sortBy}
+              />
+            </th>
+            <th>
+              Def
+              <ChangeSort
+                handleChangeSort={handleChangeSort}
+                fieldName="def"
+                activeSort={sortBy}
+              />
+            </th>
+            <th>
+              Spe
+              <ChangeSort
+                handleChangeSort={handleChangeSort}
+                fieldName="spe"
+                activeSort={sortBy}
+              />
+            </th>
+            <th>
+              SpA
+              <ChangeSort
+                handleChangeSort={handleChangeSort}
+                fieldName="spa"
+                activeSort={sortBy}
+              />
+            </th>
+            <th>
+              SpD
+              <ChangeSort
+                handleChangeSort={handleChangeSort}
+                fieldName="spd"
+                activeSort={sortBy}
+              />
+            </th>
+            <th>
+              HP
+              <ChangeSort
+                handleChangeSort={handleChangeSort}
+                fieldName="hp"
+                activeSort={sortBy}
+              />
+            </th>
+            <th>
+              Total
+              <ChangeSort
+                handleChangeSort={handleChangeSort}
+                fieldName="total"
+                activeSort={sortBy}
+              />
+            </th>
+            <th>
+              Typing
+            </th>
+            <th>
+              Abilities
+            </th>
+            <th>
+              Other Abilities
+            </th>
           </tr>
         </thead>
 
@@ -311,6 +492,37 @@ const FusionTableRender: React.FC<FusionTableRenderProps> = (props) => {
         </tbody>
       </table>
     </div>
+  );
+}
+
+
+interface ChangeSortProps {
+  handleChangeSort: (incField: FusionSortBy["field"]) => void;
+  fieldName: FusionSortBy["field"];
+  activeSort: FusionSortBy;
+}
+const ChangeSort: React.FC<ChangeSortProps> = (props) => {
+  const { handleChangeSort, fieldName, activeSort } = props;
+
+  const getIcon = (): string => {
+    if (fieldName !== activeSort.field) {
+      return "\u2B83"; // up-down arrow
+    }
+
+    if (activeSort.direction === "ascending") {
+      return "\u2BC5"; // up-pointing triangle
+    }
+
+    return "\u2BC6"; // down-pointing triangle
+  }
+
+  return (
+    <span
+      className="sort-icon"
+      onClick={() => handleChangeSort(fieldName)}
+    >
+      {getIcon()}
+    </span>
   );
 }
 

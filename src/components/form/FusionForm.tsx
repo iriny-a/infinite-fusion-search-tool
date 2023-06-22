@@ -49,7 +49,6 @@ const FusionForm: React.FC<FusionFormProps> = (props) => {
 
   const getStyleForInput = (): React.CSSProperties => {
     const input = unCosmetifyName(currentInput.toLowerCase());
-    console.log(input, currentMon);
     if (!currentMon) {
       return {};
     }

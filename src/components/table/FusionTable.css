@@ -79,3 +79,10 @@ th {
   width: 100%;
 }
 
+.sort-icon {
+  margin-left: 0.3rem;
+}
+
+.sort-icon:hover {
+  cursor: pointer;
+}
