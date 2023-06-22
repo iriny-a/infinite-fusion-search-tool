@@ -1,6 +1,6 @@
 import React from "react";
 
-import { FusionFilters, POKEMON_TYPES } from "../../data/data";
+import { FusionFilters, POKEMON_TYPES, URI_NAME } from "../../data/data";
 
 interface FusionFilterInputProps {
   filters: FusionFilters;
@@ -138,7 +138,7 @@ const FusionFilterInput: React.FC<FusionFilterInputProps> = (props) => {
                       />
                     <label htmlFor={`checkbox-type-${t}`} >
                       <img
-                        src={`./img/${t}.png`}
+                        src={`${URI_NAME}/img/${t}.png`}
                         className="checkbox-type-img"
                         alt={`${t} type icon`}
                       />

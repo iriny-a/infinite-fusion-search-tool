@@ -3,7 +3,8 @@ import React from "react";
 import {
   PokemonDataEntry,
   POKEMON_TYPES,
-  cosmetifyName
+  cosmetifyName,
+  URI_NAME
 } from "../../data/data";
 import capitalize from "../shared/capitalize";
 
@@ -140,9 +141,9 @@ const FusionTableRow: React.FC<FusionTableRowProps> = (props) => {
 
 const getTypeIcon = (type: string): string => {
   if (POKEMON_TYPES.includes(type)) {
-    return `./img/${type}.png`;
+    return `${URI_NAME}/img/${type}.png`;
   }
-  return `./img/unknown.png`;
+  return `${URI_NAME}/img/unknown.png`;
 }
 
 const CustomSpriteIcon: React.FC = () => {

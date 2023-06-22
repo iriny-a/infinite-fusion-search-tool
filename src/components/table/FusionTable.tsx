@@ -9,7 +9,8 @@ import {
   POKE_NAME_TO_ID,
   FusionPair,
   ArtWorkerMessage,
-  FusionSortBy
+  FusionSortBy,
+  URI_NAME
 } from "../../data/data";
 
 import "./FusionTable.css";
@@ -86,7 +87,7 @@ const FusionTableHandler: React.FC<FusionTableHandlerProps> = (props) => {
 
     const workerPool: Array<Worker> = [];
     for (const [name, data] of pokeData) {
-      const worker = new Worker("artWorker.js");
+      const worker = new Worker(`${URI_NAME}/artWorker.js`);
       workerPool.push(worker);
       worker.postMessage({baseId: currentMonData.id, inputId: data.id});
       worker.onmessage = (e: MessageEvent) => {
@@ -251,7 +252,7 @@ const FusionTableLoading: React.FC<FusionTableLoadingProps> = (props) => {
 const FusionTableLoadingBall: React.FC = () => {
   return (
     <div id="loading-ball">
-      <img src="./img/pokeball_shake.gif" alt="loading spinner" />
+      <img src={`${URI_NAME}/img/pokeball_shake.gif`} alt="loading spinner" />
     </div>
   );
 }

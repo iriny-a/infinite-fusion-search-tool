@@ -614,17 +614,10 @@ export const TYPE_NAMES_TO_COLORS = new Map<PokeType, string>([
   ["fairy", "#D685AD"],
 ]);
 
-// PokeAPI's support for getting this specific information is extremely clunky,
-// requiring several different API calls and a recursion to actually grab.
-// It's much more performant to cache and front-load the work.
-export const getFullyEvolvedNames = async (): Promise<Set<string>> => {
-  const dataFetch = await fetch("./finalEvos.json");
-  const fullyEvolvedNames = new Set<string>(await dataFetch.json());
-  return fullyEvolvedNames;
-}
+export const URI_NAME = "./infinite-fusion-search-tool";
 
 export const getAllPokemonData = async (): Promise<Map<string, PokemonDataEntry>> => {
-  const dataFetch = await fetch("./pokeData.json");
+  const dataFetch = await fetch(`${URI_NAME}/pokeData.json`);
   const dataUnparsed = await dataFetch.json();
 
   const pokeDataMap = new Map<string, PokemonDataEntry>();
@@ -632,6 +625,15 @@ export const getAllPokemonData = async (): Promise<Map<string, PokemonDataEntry>
     pokeDataMap.set(dt[0], parsePokeAPI(dt));
   })
   return pokeDataMap;
+}
+
+// PokeAPI's support for getting this specific information is extremely clunky,
+// requiring several different API calls and a recursion to actually grab.
+// It's much more performant to cache and front-load the work.
+export const getFullyEvolvedNames = async (): Promise<Set<string>> => {
+  const dataFetch = await fetch(`${URI_NAME}/finalEvos.json`);
+  const fullyEvolvedNames = new Set<string>(await dataFetch.json());
+  return fullyEvolvedNames;
 }
 
 // Some PIF mons are slightly different from the most recent Game Freak versions
