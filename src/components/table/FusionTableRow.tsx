@@ -11,12 +11,21 @@ interface FusionTableRowProps {
 const FusionTableRow: React.FC<FusionTableRowProps> = (props) => {
   const { data } = props;
 
+  // Capitalize first letters, anything after a dash, anything after a space
   const cleanName = (name: string | null): string => {
     if (!name) {
       return "";
     }
 
-    return name.split("/").map(n => capitalize(cosmetifyName(n))).join("/");
+    const names: string[] = name.split("/");
+    for (let i = 0; i < names.length; i++) {
+      let n = cosmetifyName(names[i]);
+      n = n.split(" ").map(w => capitalize(w)).join(" ");
+      n = n.split("-").map(w => capitalize(w)).join("-");
+      names[i] = n;
+    }
+
+    return names.join("/");
   }
   const cleanAbility = (ability: string | null): string => {
     if (!ability) {
@@ -24,6 +33,17 @@ const FusionTableRow: React.FC<FusionTableRowProps> = (props) => {
     }
 
     return ability.split(/-+/).map(w => capitalize(w)).join(" ");
+  }
+
+  const auxAbilities: JSX.Element[] = [];
+  for (let i = 0; i < 4; i++) {
+    auxAbilities.push((
+      <tr key={`aux-abilities-${data.name}-${i}`}>
+        <td>
+          {data.auxiliaryAbilities && cleanAbility(data.auxiliaryAbilities[i])}
+        </td>
+      </tr>
+    ));
   }
 
   return (
@@ -36,18 +56,18 @@ const FusionTableRow: React.FC<FusionTableRowProps> = (props) => {
         {cleanName(data.name)}
       </td>
 
-      <td style={{
-        height: "200px",
-        width: "200px",
-        border: data.artUrl?.isCustom ? "solid green 3px" : "inherit"}}
-      >
+      <td className="art-cell">
         {
           data.artUrl &&
           <img
+            className="art-img"
             src={data.artUrl.url}
-            style={{width: "100%"}}
             alt={`sprite of ${data.name} fusion`}
           />
+        }
+        {
+          data.artUrl?.isCustom &&
+          <CustomSpriteIcon />
         }
       </td>
 
@@ -122,26 +142,7 @@ const FusionTableRow: React.FC<FusionTableRowProps> = (props) => {
       <td>
         <table>
           <tbody>
-            <tr>
-              <td>
-                Ability3
-              </td>
-            </tr>
-            <tr>
-              <td>
-                Ability4
-              </td>
-            </tr>
-            <tr>
-              <td>
-                HA1
-              </td>
-            </tr>
-            <tr>
-              <td>
-                HA2
-              </td>
-            </tr>
+            {auxAbilities}
           </tbody>
         </table>
       </td>
@@ -154,6 +155,17 @@ const getTypeIcon = (type: string): string => {
     return `./icons/${type}.png`;
   }
   return `./icons/unknown.png`;
+}
+
+const CustomSpriteIcon: React.FC = () => {
+  return (
+    <div
+      className="custom-sprite-icon"
+      title="Custom sprite"
+    >
+      {"\uD83D\uDD8C"}
+    </div>
+  );
 }
 
 export default FusionTableRow;

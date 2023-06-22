@@ -7,6 +7,7 @@ const getFusionData = (
   incomingMon: "head" | "body",
   fullyEvolvedList: Set<string>
 ): PokemonDataEntry => {
+  const [abilities, auxAbilities] = getFusionAbilities(headData, bodyData);
   const fusionData: PokemonDataEntry = {
     name: `${capitalize(headData.name)}/${capitalize(bodyData.name)}`,
     id: `${headData.id}.${bodyData.id}`,
@@ -22,7 +23,8 @@ const getFusionData = (
       hp: weightStat(headData.stats.hp, bodyData.stats.hp),
     },
     types: getFusionTyping(headData, bodyData),
-    abilities: getFusionAbilities(headData.abilities, bodyData.abilities),
+    abilities: abilities,
+    auxiliaryAbilities: auxAbilities,
 
     incomingId: incomingMon === "head" ? headData.id : bodyData.id,
     incomingName: incomingMon === "head" ? headData.name : bodyData.name,
@@ -73,18 +75,39 @@ const getFusionTyping = (
 }
 
 const getFusionAbilities = (
-  headAbilities: PokemonAbilities,
-  bodyAbilities: PokemonAbilities
-): PokemonAbilities => {
- // Most fusions will take head's second ability or body's first ability
- const fusionAbilities: PokemonAbilities = {
-   firstAbility: bodyAbilities.firstAbility,
-   secondAbility: headAbilities.secondAbility,
-   hiddenAbility: null,
- }
- // TODO: overrides, exceptions, edge cases, and HA
+  headData: PokemonDataEntry,
+  bodyData: PokemonDataEntry,
+): [PokemonAbilities, string[]] => {
+  const headAbilities = headData.abilities;
+  const bodyAbilities = bodyData.abilities;
 
- return fusionAbilities;
+  // Most fusions default to the head's second ability and the body's first.
+  // If the head doesn't have a second ability, use its first.
+  const fusionAbilities: PokemonAbilities = {
+    firstAbility: bodyAbilities.firstAbility,
+    secondAbility: headAbilities.secondAbility || headAbilities.firstAbility,
+    hiddenAbility: null,
+  }
+  // Remove duplicates
+  if (fusionAbilities.firstAbility === fusionAbilities.secondAbility) {
+    fusionAbilities.secondAbility = null;
+  }
+
+  // Lazily enumerate the abilities that weren't selected above and throw in the
+  // HAs as well (TODO: make this better lol)
+  const auxAbilities = new Set<string | null>([
+    headAbilities.firstAbility,
+    headAbilities.secondAbility,
+    bodyAbilities.firstAbility,
+    bodyAbilities.secondAbility,
+    headAbilities.hiddenAbility ? headAbilities.hiddenAbility + " (HA)" : null,
+    bodyAbilities.hiddenAbility ? bodyAbilities.hiddenAbility + " (HA)" : null,
+  ]);
+  auxAbilities.delete(null);
+  auxAbilities.delete(fusionAbilities.firstAbility);
+  auxAbilities.delete(fusionAbilities.secondAbility);
+
+ return [fusionAbilities, Array.from(auxAbilities) as Array<string>];
 }
 
 const weightStat = (higher: number, lower: number): number => {

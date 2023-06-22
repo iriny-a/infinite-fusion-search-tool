@@ -36,6 +36,7 @@ export interface PokemonDataEntry {
   incomingId?: string;
   incomingName?: string;
   incomingFullyEvolved?: string;
+  auxiliaryAbilities?: string[];
 }
 
 export interface PokeAPIRes {
@@ -964,6 +965,50 @@ export const maybeGetTypingOverride = (dt: PokemonDataEntry): PokeType | null =>
   return typingOverride ? typingOverride : null;
 }
 
+// For either balance or thematic reasons, some mons in PIF have their primary
+// and secondary abilities swapped. Any such differences are specified here and
+// integrated when the cached API data is parsed.
+const reversedAbilityMons = new Set<string>([
+  "pidgey",
+  "pidgeotto",
+  "pidgeot",
+  "ekans",
+  "arbok",
+  "diglett",
+  "dugtrio",
+  "growlithe",
+  "arcanine",
+  "farfetchd",
+  "onix",
+  "steelix",
+  "krabby",
+  "kingler",
+  "voltorb",
+  "electrode",
+  "cubone",
+  "marowak",
+  "hitmonchan",
+  "lapras",
+  "snorlax",
+  "aerodactyl",
+  "chinchou",
+  "lanturn",
+  "azurill",
+  "marill",
+  "azumarill",
+  "dunsparce",
+  "murkrow",
+  "honchkrow",
+  "snubbull",
+  "granbull",
+  "teddiursa",
+  "ursaring",
+  "absol",
+  "cleffa",
+  "clefairy",
+  "clefable",
+]);
+
 export const getStatTotal = (s: PokemonStats): number => {
   return (
     s.attack
@@ -1027,6 +1072,10 @@ const parsePokeAPI = (res: [string, PokeAPIRes]): PokemonDataEntry => {
       abilities.firstAbility = abilityName;
     }
   });
+  if (reversedAbilityMons.has(name)) {
+    [abilities.firstAbility, abilities.secondAbility] =
+      [abilities.secondAbility as string, abilities.firstAbility];
+  }
 
   return {
     name,
