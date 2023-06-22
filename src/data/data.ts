@@ -614,7 +614,11 @@ export const TYPE_NAMES_TO_COLORS = new Map<PokeType, string>([
   ["fairy", "#D685AD"],
 ]);
 
-export const URI_NAME = "./infinite-fusion-search-tool";
+// Not the cleanest solution, but can be fixed later.
+export const URI_NAME =
+  (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') ?
+  "./infinite-fusion-search-tool" :
+  ".";
 
 export const getAllPokemonData = async (): Promise<Map<string, PokemonDataEntry>> => {
   const dataFetch = await fetch(`${URI_NAME}/pokeData.json`);
