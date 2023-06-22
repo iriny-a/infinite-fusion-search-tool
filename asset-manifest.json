@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/infinite-fusion-search-tool/static/css/main.5ea017f2.css",
+    "main.js": "/infinite-fusion-search-tool/static/js/main.c83b6404.js",
+    "static/js/787.8d621cdb.chunk.js": "/infinite-fusion-search-tool/static/js/787.8d621cdb.chunk.js",
+    "index.html": "/infinite-fusion-search-tool/index.html",
+    "main.5ea017f2.css.map": "/infinite-fusion-search-tool/static/css/main.5ea017f2.css.map",
+    "main.c83b6404.js.map": "/infinite-fusion-search-tool/static/js/main.c83b6404.js.map",
+    "787.8d621cdb.chunk.js.map": "/infinite-fusion-search-tool/static/js/787.8d621cdb.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.5ea017f2.css",
+    "static/js/main.c83b6404.js"
+  ]
+}
