@@ -1,6 +1,11 @@
-:root {
-  background-color: #222;
-  color: #ddd;
+:root {  
+  --border-color: #777;
+  --background-color: #222;
+  --font-color: #ddd;
+  --interactable-color: cyan;
+
+  background-color: var(--background-color);
+  color: var(--font-color);
 }
 
 body, html {
@@ -26,21 +31,18 @@ body, html {
   overflow-x: hidden;
   
   box-sizing: border-box;
-  border-right: solid #ccc 2px;
+  border-right: solid var(--border-color) 2px;
 }
 
 #fusion-table-panel {
   width: 70%;
-  margin: 2rem;
+  margin-left: 3rem;
 
   display: flex;
   justify-content: center;
   align-items: center;
   overflow-y: auto;
   position: relative;
-
-  box-sizing: border-box;
-  border-left: solid ccc 2px;
 }
 
 #app-info {

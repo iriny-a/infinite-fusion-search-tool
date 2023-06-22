@@ -12,9 +12,9 @@ const FusionTableRow: React.FC<FusionTableRowProps> = (props) => {
   const { data } = props;
 
   // Capitalize first letters, anything after a dash, anything after a space
-  const cleanName = (name: string | null): string => {
+  const cleanName = (name: string | null): JSX.Element[] => {
     if (!name) {
-      return "";
+      return [];
     }
 
     const names: string[] = name.split("/");
@@ -25,8 +25,9 @@ const FusionTableRow: React.FC<FusionTableRowProps> = (props) => {
       names[i] = n;
     }
 
-    return names.join("/");
+    return names.map((n, i) => <div key={`fusion-name-${name}-${i}`}>{n}</div>);
   }
+
   const cleanAbility = (ability: string | null): string => {
     if (!ability) {
       return "";
@@ -35,16 +36,11 @@ const FusionTableRow: React.FC<FusionTableRowProps> = (props) => {
     return ability.split(/-+/).map(w => capitalize(w)).join(" ");
   }
 
-  const auxAbilities: JSX.Element[] = [];
-  for (let i = 0; i < 4; i++) {
-    auxAbilities.push((
-      <tr key={`aux-abilities-${data.name}-${i}`}>
-        <td>
-          {data.auxiliaryAbilities && cleanAbility(data.auxiliaryAbilities[i])}
-        </td>
-      </tr>
-    ));
-  }
+  const auxAbilities = data.auxiliaryAbilities?.map((ab, i) => (
+    <div key={`aux-abilities-${data.name}-${i}`}>
+      {cleanAbility(ab)}
+    </div>
+  ));
 
   return (
     <tr>
@@ -71,80 +67,68 @@ const FusionTableRow: React.FC<FusionTableRowProps> = (props) => {
         }
       </td>
 
-      <td>
+      <td className="stat-cell">
         {data.stats.attack}
       </td>
-      <td>
+      <td className="stat-cell">
         {data.stats.defense}
       </td>
-      <td>
+      <td className="stat-cell">
         {data.stats.speed}
       </td>
 
-      <td>
+      <td className="stat-cell">
         {data.stats["special-attack"]}
       </td>
-      <td>
+      <td className="stat-cell">
         {data.stats["special-defense"]}
       </td>
-      <td>
+      <td className="stat-cell">
         {data.stats.hp}
       </td>
 
-      <td>
+      <td className="stat-cell">
         {data.statTotal}
       </td>
 
       <td className="type-column">
-        <table>
-          <tbody>
-            <tr>
-              <td>
-                <img
-                  className="type-icon"
-                  src={getTypeIcon(data.types.firstType)}
-                  alt={`${data.types.firstType} type icon`}
-                />
-              </td>
-            </tr>
-            { data.types.secondType &&
-              <tr>
-                <td>
-                    <img
-                      className="type-icon"
-                      src={getTypeIcon(data.types.secondType)}
-                      alt={`${data.types.secondType} type icon`}
-                    />
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+        <div className="div-table-cell-flex">
+          <div>
+            <img
+              className="type-icon"
+              src={getTypeIcon(data.types.firstType)}
+              alt={`${data.types.firstType} type icon`}
+            />
+          </div>
+          { data.types.secondType &&
+            <div>
+              <img
+                className="type-icon"
+                src={getTypeIcon(data.types.secondType)}
+                alt={`${data.types.secondType} type icon`}
+              />
+            </div>
+          }
+        </div>
       </td>
 
       <td>
-        <table>
-          <tbody>
-            <tr>
-              <td>
-                {cleanAbility(data.abilities.firstAbility)}
-              </td>
-            </tr>
-            <tr>
-              <td>
-                {cleanAbility(data.abilities.secondAbility)}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="div-table-cell-flex">
+          <div>
+            {cleanAbility(data.abilities.firstAbility)}
+          </div>
+          { data.abilities.secondAbility &&
+            <div>
+              {cleanAbility(data.abilities.secondAbility)}
+            </div>
+          }
+        </div>
       </td>
 
       <td>
-        <table>
-          <tbody>
-            {auxAbilities}
-          </tbody>
-        </table>
+        <div className="div-table-cell-flex">
+          {auxAbilities}
+        </div>
       </td>
     </tr>
   );
@@ -161,7 +145,7 @@ const CustomSpriteIcon: React.FC = () => {
   return (
     <div
       className="custom-sprite-icon"
-      title="Custom sprite"
+      title="Custom sprite -- check the Discord for artist credit!"
     >
       {"\uD83D\uDD8C"}
     </div>

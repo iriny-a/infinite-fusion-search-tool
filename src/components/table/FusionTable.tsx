@@ -392,105 +392,123 @@ const FusionTableRender: React.FC<FusionTableRenderProps> = (props) => {
     return null;
   }
 
-  console.log("render", fusionData[0].name)
-
   return (
     <div id="fusion-table-container">
-      <h2>Search Results ({fusionData.length} found)</h2>
-      <table id="fusion-table">
-        <thead id="fusion-table-head">
-          <tr>
-            <th>
-              Dex No.
-              <ChangeSort
-                handleChangeSort={handleChangeSort}
-                fieldName="id"
-                activeSort={sortBy}
-              />
-            </th>
-            <th>
-              Name
-              <ChangeSort
-                handleChangeSort={handleChangeSort}
-                fieldName="name"
-                activeSort={sortBy}
-              />
-            </th>
-            <th>
-              Art
-            </th>
-            <th>
-              Atk
-              <ChangeSort
-                handleChangeSort={handleChangeSort}
-                fieldName="atk"
-                activeSort={sortBy}
-              />
-            </th>
-            <th>
-              Def
-              <ChangeSort
-                handleChangeSort={handleChangeSort}
-                fieldName="def"
-                activeSort={sortBy}
-              />
-            </th>
-            <th>
-              Spe
-              <ChangeSort
-                handleChangeSort={handleChangeSort}
-                fieldName="spe"
-                activeSort={sortBy}
-              />
-            </th>
-            <th>
-              SpA
-              <ChangeSort
-                handleChangeSort={handleChangeSort}
-                fieldName="spa"
-                activeSort={sortBy}
-              />
-            </th>
-            <th>
-              SpD
-              <ChangeSort
-                handleChangeSort={handleChangeSort}
-                fieldName="spd"
-                activeSort={sortBy}
-              />
-            </th>
-            <th>
-              HP
-              <ChangeSort
-                handleChangeSort={handleChangeSort}
-                fieldName="hp"
-                activeSort={sortBy}
-              />
-            </th>
-            <th>
-              Total
-              <ChangeSort
-                handleChangeSort={handleChangeSort}
-                fieldName="total"
-                activeSort={sortBy}
-              />
-            </th>
-            <th>
-              Typing
-            </th>
-            <th>
-              Abilities
-            </th>
-            <th>
-              Other Abilities
-            </th>
-          </tr>
-        </thead>
+      <h1>Search Results ({fusionData.length} found)</h1>
+      <div id="fusion-table-wrapper">
+        <table id="fusion-table">
+          <thead id="fusion-table-head">
+            <tr>
+              <th>
+                <div className="header-with-sort">
+                  <span>No.</span>
+                  <ChangeSort
+                    handleChangeSort={handleChangeSort}
+                    fieldName="id"
+                    activeSort={sortBy}
+                    />
+                </div>
+              </th>
+              <th>
+                <div className="header-with-sort">
+                  <span>Name</span>
+                  <ChangeSort
+                    handleChangeSort={handleChangeSort}
+                    fieldName="name"
+                    activeSort={sortBy}
+                    />
+                </div>
+              </th>
+              <th>
+                <span>Fusion Sprite</span>
+              </th>
+              <th className="stat-heading">
+                <div className="header-with-sort">
+                  <span>Atk</span>
+                  <ChangeSort
+                    handleChangeSort={handleChangeSort}
+                    fieldName="atk"
+                    activeSort={sortBy}
+                  />
+                </div>
+              </th>
+              <th className="stat-heading">
+                <div className="header-with-sort">
+                  <span>Def</span>
+                  <ChangeSort
+                    handleChangeSort={handleChangeSort}
+                    fieldName="def"
+                    activeSort={sortBy}
+                  />
+                </div>
+              </th>
+              <th className="stat-heading">
+                <div className="header-with-sort">
+                  <span>Spe</span>
+                  <ChangeSort
+                    handleChangeSort={handleChangeSort}
+                    fieldName="spe"
+                    activeSort={sortBy}
+                  />
+                </div>
+              </th>
+              <th className="stat-heading">
+                <div className="header-with-sort">
+                  <span>SpA</span>
+                  <ChangeSort
+                    handleChangeSort={handleChangeSort}
+                    fieldName="spa"
+                    activeSort={sortBy}
+                  />
+                </div>
+              </th>
+              <th className="stat-heading">
+                <div className="header-with-sort">
+                  <span>SpD</span>
+                  <ChangeSort
+                    handleChangeSort={handleChangeSort}
+                    fieldName="spd"
+                    activeSort={sortBy}
+                  />
+                </div>
+              </th>
+              <th className="stat-heading">
+                <div className="header-with-sort">
+                  <span>HP</span>
+                  <ChangeSort
+                    handleChangeSort={handleChangeSort}
+                    fieldName="hp"
+                    activeSort={sortBy}
+                  />
+                </div>
+              </th>
+              <th className="stat-heading">
+                <div className="header-with-sort">
+                  <span>BST</span>
+                  <ChangeSort
+                    handleChangeSort={handleChangeSort}
+                    fieldName="total"
+                    activeSort={sortBy}
+                  />
+                </div>
+              </th>
+              <th>
+                <span>Types</span>
+              </th>
+              <th>
+                <span>Default Abilities</span>
+              </th>
+              <th>
+                <span>Other Abilities</span>
+              </th>
+            </tr>
+          </thead>
 
-        <tbody>
-          {tableRows}
-        </tbody>
-      </table>
+          <tbody>
+            {tableRows}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
