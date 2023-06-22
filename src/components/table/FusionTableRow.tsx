@@ -1,6 +1,10 @@
 import React from "react";
 
-import { PokemonDataEntry, POKEMON_TYPES, cosmetifyName, FusionSortBy } from "../../data/data";
+import {
+  PokemonDataEntry,
+  POKEMON_TYPES,
+  cosmetifyName
+} from "../../data/data";
 import capitalize from "../shared/capitalize";
 
 
@@ -101,7 +105,7 @@ const FusionTableRow: React.FC<FusionTableRowProps> = (props) => {
             />
           </div>
           { data.types.secondType &&
-            <div>
+            <div className="second-type-icon">
               <img
                 className="type-icon"
                 src={getTypeIcon(data.types.secondType)}
@@ -136,9 +140,9 @@ const FusionTableRow: React.FC<FusionTableRowProps> = (props) => {
 
 const getTypeIcon = (type: string): string => {
   if (POKEMON_TYPES.includes(type)) {
-    return `./icons/${type}.png`;
+    return `./img/${type}.png`;
   }
-  return `./icons/unknown.png`;
+  return `./img/unknown.png`;
 }
 
 const CustomSpriteIcon: React.FC = () => {

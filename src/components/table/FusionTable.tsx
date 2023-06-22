@@ -170,7 +170,7 @@ const FusionTableHandler: React.FC<FusionTableHandlerProps> = (props) => {
     setStatus(LoadingStatus.Done);
   }, [fusionData, filters, status]);
 
-  // Form control.
+  // Form control
   useEffect(() => {
     switch(status) {
       case LoadingStatus.Fetching:
@@ -248,15 +248,13 @@ const FusionTableLoading: React.FC<FusionTableLoadingProps> = (props) => {
   return null;
 }
 
-
 const FusionTableLoadingBall: React.FC = () => {
   return (
     <div id="loading-ball">
-      <img src="./icons/pokeball_shake.gif" alt="loading spinner" />
+      <img src="./img/pokeball_shake.gif" alt="loading spinner" />
     </div>
   );
 }
-
 
 interface FusionTableProgressBarProps {
   count: number;
@@ -270,6 +268,7 @@ const FusionTableProgressBar: React.FC<FusionTableProgressBarProps> = (props) =>
     </div>
   )
 }
+
 
 const getDefaultSort = (): FusionSortBy => {
   return {
@@ -370,8 +369,6 @@ const FusionTableRender: React.FC<FusionTableRenderProps> = (props) => {
   const { fusionData, sortBy, handleChangeSort } = props;
   const [ tableRows, setTableRows ] = useState<JSX.Element[]>([]);
 
-  console.log("start of fusiontablerender")
-
   useEffect(() => {
     const rows: JSX.Element[] = [];
     fusionData.forEach((f, i) => {
@@ -384,7 +381,6 @@ const FusionTableRender: React.FC<FusionTableRenderProps> = (props) => {
         );
       }
     });
-    console.log(rows[0]);
     setTableRows(rows);
   }, [fusionData]);
 
@@ -543,5 +539,8 @@ const ChangeSort: React.FC<ChangeSortProps> = (props) => {
     </span>
   );
 }
+
+
+
 
 export default FusionTable;

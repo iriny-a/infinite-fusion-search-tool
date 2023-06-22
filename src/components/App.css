@@ -31,12 +31,12 @@ body, html {
   overflow-x: hidden;
   
   box-sizing: border-box;
-  border-right: solid var(--border-color) 2px;
+  border-right: solid var(--border-color) 5px;
 }
 
 #fusion-table-panel {
   width: 70%;
-  margin-left: 3rem;
+  margin-left: 0rem;
 
   display: flex;
   justify-content: center;

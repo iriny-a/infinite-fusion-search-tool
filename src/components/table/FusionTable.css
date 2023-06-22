@@ -1,3 +1,7 @@
+#no-pokemon-msg {
+  font-size: x-large;
+}
+
 #app-title {
   text-align: center;
 }
@@ -11,14 +15,23 @@
   text-align: center;
 }
 
+#fusion-table-container > h1 {
+  margin-bottom: 3.7rem;
+}
+
+#fusion-table-title-container {
+  height: 100%;
+  width: 100%;
+  border: solid red 1px;
+}
+
 #fusion-table-wrapper {
   margin: 3rem 0 0;
   padding: 0;
-  min-width: 98%;
-  max-width: 98%;
+  min-width: 99%;
 
   border: solid var(--border-color) 5px;
-  border-radius: 4px;
+  border-left: none;
 }
 
 #fusion-table {
@@ -73,6 +86,7 @@ td {
 }
 
 img.art-img {
+  min-width: 150px;
   width: 100%;
 }
 
@@ -110,6 +124,10 @@ div.div-table-cell-flex {
   align-items: center;
   flex-direction: column;
 }
+
+ div.second-type-icon {
+  margin-top: 0.2rem;
+ }
 
 
 .loading {

@@ -138,7 +138,7 @@ const FusionFilterInput: React.FC<FusionFilterInputProps> = (props) => {
                       />
                     <label htmlFor={`checkbox-type-${t}`} >
                       <img
-                        src={`./icons/${t}.png`}
+                        src={`./img/${t}.png`}
                         className="checkbox-type-img"
                         alt={`${t} type icon`}
                       />
