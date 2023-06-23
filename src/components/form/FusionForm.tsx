@@ -32,9 +32,9 @@ const FusionForm: React.FC<FusionFormProps> = (props) => {
   }
 
   const triggerSubmitWithName = (maybePokeName: string) => {
-    maybePokeName = maybePokeName.toLowerCase().trim()
+    maybePokeName = unCosmetifyName(maybePokeName.trim());
     if (POKE_NAME_TO_ID.get(maybePokeName) === undefined) {
-      alert(`No Pokémon named ${maybePokeName} could be found.`);
+      alert(`No Pokémon named "${maybePokeName}" could be found.`);
       return;
     }
 
