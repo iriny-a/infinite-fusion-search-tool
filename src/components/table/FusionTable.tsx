@@ -137,12 +137,21 @@ const FusionTableHandler: React.FC<FusionTableHandlerProps> = (props) => {
     // Head/body filter
     let filteredData: PokemonDataEntry[] = [];
     filteredPairs.forEach(p => {
-      if (filters.useInputAs === "both" || filters.useInputAs === "head") {
-        filteredData.push(p.headBody);
-      }
-      if (p.baseMon !== p.inputMon
-        && (filters.useInputAs === "both" || filters.useInputAs === "body")) {
-        filteredData.push(p.bodyHead);
+      switch (filters.useInputAs) {
+        case "both":
+          filteredData.push(p.headBody);
+          if (p.baseMon !== p.inputMon) {
+            filteredData.push(p.bodyHead);
+          }
+          break;
+
+        case "head":
+          filteredData.push(p.headBody);
+          break;
+
+        case "body":
+          filteredData.push(p.bodyHead);
+          break;
       }
     });
 
