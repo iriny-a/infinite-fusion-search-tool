@@ -21,7 +21,7 @@ const getArtURL = async (headId, bodyId) => {
     };
   }
   return {
-    url: AEGIDE_AUTOGEN_URL + `${bodyId}/${bodyId}.${headId}.png`,
+    url: AEGIDE_AUTOGEN_URL + `${headId}/${headId}.${bodyId}.png`,
     isCustom: false,
   };
 }
