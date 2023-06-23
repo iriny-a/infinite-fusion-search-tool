@@ -16,7 +16,6 @@ interface FusionTableRowProps {
 const FusionTableRow: React.FC<FusionTableRowProps> = (props) => {
   const { data } = props;
 
-  // Capitalize first letters, anything after a dash, anything after a space
   const cleanName = (name: string | null): JSX.Element[] => {
     if (!name) {
       return [];
@@ -24,9 +23,7 @@ const FusionTableRow: React.FC<FusionTableRowProps> = (props) => {
 
     const names: string[] = name.split("/");
     for (let i = 0; i < names.length; i++) {
-      let n = cosmetifyName(names[i]);
-      n = n.split(" ").map(w => capitalize(w)).join(" ");
-      n = n.split("-").map(w => capitalize(w)).join("-");
+      let n = capitalize(cosmetifyName(names[i]));
       names[i] = n;
     }
 
@@ -38,7 +35,7 @@ const FusionTableRow: React.FC<FusionTableRowProps> = (props) => {
       return "";
     }
 
-    return ability.split(/-+/).map(w => capitalize(w)).join(" ");
+    return capitalize(ability).replaceAll("-", " ");
   }
 
   const auxAbilities = data.auxiliaryAbilities?.map((ab, i) => (

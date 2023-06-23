@@ -53,7 +53,7 @@ const FusionInput: React.FC<FusionInputProps> = (props) => {
 
     setAutocompleteList(POKE_NAMES.filter(n => (
       n.indexOf(input.toLowerCase()) > -1
-    )).map(n => cosmetifyName(n)));
+    )).map(n => capitalize(cosmetifyName(n))));
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -81,7 +81,7 @@ const FusionInput: React.FC<FusionInputProps> = (props) => {
       e.preventDefault(); // prevent premature form submission
       if (autocompleteList) {
         const name = autocompleteList[activeAutocomplete - 1];
-        setSelectedPokemon(capitalize(name));
+        setSelectedPokemon(capitalize(cosmetifyName(name)));
       }
       return;
     }

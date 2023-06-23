@@ -38,6 +38,12 @@ const FusionForm: React.FC<FusionFormProps> = (props) => {
       return;
     }
 
+    // The autocomplete menu lets users submit the same Pokemon repeatedly,
+    // which should not affect the app.
+    if (maybePokeName === currentMon) {
+      return;
+    }
+
     setCurrentMon(maybePokeName);
     setIsFormEnabled(false);
   }
