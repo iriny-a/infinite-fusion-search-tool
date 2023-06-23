@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/infinite-fusion-search-tool/static/css/main.0010f64e.css",
-    "main.js": "/infinite-fusion-search-tool/static/js/main.2b9f4241.js",
+    "main.js": "/infinite-fusion-search-tool/static/js/main.f009c23e.js",
     "static/js/787.8d621cdb.chunk.js": "/infinite-fusion-search-tool/static/js/787.8d621cdb.chunk.js",
     "index.html": "/infinite-fusion-search-tool/index.html",
     "main.0010f64e.css.map": "/infinite-fusion-search-tool/static/css/main.0010f64e.css.map",
-    "main.2b9f4241.js.map": "/infinite-fusion-search-tool/static/js/main.2b9f4241.js.map",
+    "main.f009c23e.js.map": "/infinite-fusion-search-tool/static/js/main.f009c23e.js.map",
     "787.8d621cdb.chunk.js.map": "/infinite-fusion-search-tool/static/js/787.8d621cdb.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.0010f64e.css",
-    "static/js/main.2b9f4241.js"
+    "static/js/main.f009c23e.js"
   ]
 }
